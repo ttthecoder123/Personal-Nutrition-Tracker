@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a0a0a">
     <title>Nutrition Tracker</title>
-
+    
     <style>
         * {
             margin: 0;
@@ -16,7 +14,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
             color: #ffffff;
             min-height: 100vh;
@@ -24,18 +22,19 @@
             -moz-osx-font-smoothing: grayscale;
             touch-action: manipulation;
             overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         .container {
             max-width: 400px;
             margin: 0 auto;
-            padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
+            padding: env(safe-area-inset-top, 15px) 15px env(safe-area-inset-bottom, 15px);
             min-height: 100vh;
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.3s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -47,25 +46,27 @@
             right: 0;
             background: rgba(26, 26, 26, 0.95);
             backdrop-filter: blur(10px);
-            padding: 10px 20px;
+            padding: 8px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            height: 40px;
         }
 
         .connection-status {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
+            gap: 6px;
+            font-size: 11px;
             color: #a0a0a0;
+            cursor: pointer;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: #fbbf24;
             animation: pulse 2s infinite;
@@ -73,10 +74,12 @@
 
         .status-dot.connected {
             background: #10b981;
+            animation: none;
         }
 
         .status-dot.error {
             background: #ef4444;
+            animation: none;
         }
 
         @keyframes pulse {
@@ -85,59 +88,59 @@
         }
 
         .sync-info {
-            font-size: 11px;
-            color: #a0a0a0;
+            font-size: 10px;
+            color: #666;
         }
 
         .unsynced-badge {
             background: #ef4444;
             color: white;
-            border-radius: 10px;
-            padding: 2px 6px;
-            font-size: 10px;
+            border-radius: 8px;
+            padding: 1px 5px;
+            font-size: 9px;
             font-weight: 600;
-            margin-left: 5px;
+            margin-left: 4px;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            margin-top: 50px;
+            margin-bottom: 20px;
+            margin-top: 45px;
         }
 
         .app-title {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             cursor: pointer;
             user-select: none;
         }
 
         .date-display {
-            font-size: 16px;
+            font-size: 14px;
             color: #a0a0a0;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .card {
             background: #1a1a1a;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .daily-totals {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 15px;
         }
 
         .total-item {
@@ -145,14 +148,15 @@
         }
 
         .total-value {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             color: #ffffff;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            transition: transform 0.2s ease;
         }
 
         .total-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #a0a0a0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -160,112 +164,99 @@
 
         .progress-bar {
             width: 100%;
-            height: 6px;
+            height: 4px;
             background: #2a2a2a;
-            border-radius: 3px;
+            border-radius: 2px;
             overflow: hidden;
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.5s ease;
-            border-radius: 3px;
-        }
-
-        .favorites-section {
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 15px;
-        }
-
-        .favorites-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-
-        .favorite-btn {
-            background: #2a2a2a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 15px 12px;
-            color: #ffffff;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .favorite-btn:active {
-            transform: scale(0.98);
-            background: #3a3a3a;
-        }
-
-        .delete-favorite {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            display: none;
-        }
-
-        .favorite-btn:hover .delete-favorite {
-            display: block;
+            transition: width 0.3s ease;
+            border-radius: 2px;
         }
 
         .form-section {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            position: relative;
         }
 
         .form-label {
             display: block;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: #a0a0a0;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+        }
+
+        .form-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
 
         .form-input {
             width: 100%;
-            min-height: 48px;
+            min-height: 52px;
             background: #2a2a2a;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            padding: 0 16px;
+            padding: 0 50px 0 16px;
             color: #ffffff;
             font-size: 16px;
             transition: all 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .form-input:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+            transform: scale(1.02);
+        }
+
+        .input-steppers {
+            position: absolute;
+            right: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stepper-btn {
+            width: 32px;
+            height: 22px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .stepper-btn:active {
+            background: rgba(102, 126, 234, 0.4);
+            transform: scale(0.95);
         }
 
         .form-row {
@@ -308,223 +299,23 @@
             cursor: not-allowed;
         }
 
-        /* Multi-step Progress */
-        .submission-progress {
-            display: none;
-            background: #2a2a2a;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .submit-btn.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         }
 
-        .submission-progress.active {
-            display: block;
-            animation: slideIn 0.3s ease;
+        .success-checkmark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 24px;
+            animation: checkmarkPop 0.5s ease forwards;
         }
 
-        .progress-step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            opacity: 0.3;
-            transition: all 0.3s ease;
-        }
-
-        .progress-step.active {
-            opacity: 1;
-        }
-
-        .progress-step.completed {
-            opacity: 1;
-        }
-
-        .progress-step.error {
-            color: #ef4444;
-        }
-
-        .step-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .step-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid #ffffff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .step-checkmark {
-            color: #10b981;
-            font-size: 20px;
-        }
-
-        .step-error {
-            color: #ef4444;
-            font-size: 20px;
-        }
-
-        .step-text {
-            flex: 1;
-        }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            z-index: 2000;
-            pointer-events: none;
-        }
-
-        .toast {
-            background: #2a2a2a;
-            color: #ffffff;
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            pointer-events: auto;
-            animation: slideInRight 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 350px;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .toast.success {
-            border-left: 4px solid #10b981;
-        }
-
-        .toast.error {
-            border-left: 4px solid #ef4444;
-        }
-
-        .toast.warning {
-            border-left: 4px solid #fbbf24;
-        }
-
-        .toast-icon {
-            font-size: 20px;
-        }
-
-        .toast-content {
-            flex: 1;
-        }
-
-        .toast-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .toast-message {
-            font-size: 14px;
-            color: #a0a0a0;
-        }
-
-        .toast-action {
-            background: rgba(102, 126, 234, 0.2);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            color: #667eea;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        /* Save as Favorite Modal */
-        .favorite-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 3000;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .favorite-modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: #1a1a1a;
-            border-radius: 16px;
-            padding: 24px;
-            width: 90%;
-            max-width: 350px;
-            animation: scaleIn 0.3s ease;
-        }
-
-        @keyframes scaleIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .modal-input {
-            width: 100%;
-            min-height: 48px;
-            background: #2a2a2a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 0 16px;
-            color: #ffffff;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            min-height: 44px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .modal-btn.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-        }
-
-        .modal-btn.secondary {
-            background: #2a2a2a;
-            color: #a0a0a0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        @keyframes checkmarkPop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
 
         .apple-health-btn {
@@ -532,91 +323,139 @@
             min-height: 48px;
             background: rgba(102, 126, 234, 0.1);
             border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 16px;
+            border-radius: 12px;
             color: #667eea;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: none;
         }
 
         .apple-health-btn.show {
             display: block;
+            animation: slideIn 0.3s ease;
         }
 
-        .history-section {
-            margin-bottom: 30px;
+        .apple-health-btn:active {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(0.98);
         }
 
-        .history-item {
-            background: #2a2a2a;
+        .undo-btn {
+            width: 100%;
+            min-height: 44px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            position: relative;
-            transition: all 0.2s ease;
-            touch-action: pan-y;
-        }
-
-        .history-item.swipe-left {
-            transform: translateX(-80px);
-        }
-
-        .history-delete {
-            position: absolute;
-            right: -80px;
-            top: 0;
-            bottom: 0;
-            width: 80px;
-            background: #ef4444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0 12px 12px 0;
-            color: white;
+            color: #ef4444;
+            font-size: 14px;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 15px;
+            display: none;
         }
 
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .undo-btn.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .undo-btn:active {
+            background: rgba(239, 68, 68, 0.2);
+            transform: scale(0.98);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .favorites-section {
+            margin-bottom: 20px;
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             margin-bottom: 10px;
         }
 
-        .history-time {
-            font-size: 12px;
-            color: #a0a0a0;
-        }
-
-        .history-details {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            font-size: 12px;
-        }
-
-        .history-macro {
-            text-align: center;
-        }
-
-        .history-macro-value {
-            font-weight: 600;
+        .favorite-btn {
+            background: #2a2a2a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 10px;
             color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            min-height: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
-        .history-macro-label {
+        .favorite-btn:active {
+            transform: scale(0.95);
+            background: #3a3a3a;
+        }
+
+        .favorite-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .favorite-macros {
+            font-size: 10px;
             color: #a0a0a0;
-            margin-top: 2px;
+            line-height: 1.2;
+        }
+
+        .delete-favorite {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .favorite-btn:hover .delete-favorite,
+        .favorite-btn.touch .delete-favorite {
+            display: flex;
+        }
+
+        .add-favorite-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px dashed rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            display: none;
+        }
+
+        .add-favorite-btn.show {
+            display: flex;
         }
 
         .quick-add-section {
-            margin-top: 15px;
+            margin-top: 12px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .quick-add-btn {
@@ -635,42 +474,173 @@
 
         .quick-add-btn:active {
             background: rgba(102, 126, 234, 0.3);
+            transform: scale(0.95);
         }
 
-        /* Debug Mode */
-        .debug-panel {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #0a0a0a;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            max-height: 50vh;
-            overflow-y: auto;
-            z-index: 4000;
+        .history-section {
+            margin-bottom: 20px;
         }
 
-        .debug-panel.active {
-            display: block;
+        .history-item {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            transition: all 0.2s ease;
+            touch-action: pan-y;
         }
 
-        .debug-title {
-            font-size: 16px;
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-time {
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .history-macro {
+            text-align: center;
+        }
+
+        .history-macro-value {
             font-weight: 600;
-            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .history-macro-label {
+            color: #a0a0a0;
+            margin-top: 2px;
+        }
+
+        .history-delete {
+            position: absolute;
+            right: -70px;
+            top: 0;
+            bottom: 0;
+            width: 70px;
+            background: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 12px 12px 0;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 50px;
+            right: 15px;
+            z-index: 2000;
+            pointer-events: none;
+            max-width: 350px;
+        }
+
+        .toast {
+            background: #2a2a2a;
+            color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+            animation: slideInRight 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateX(100%);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success {
+            border-left: 3px solid #10b981;
+        }
+
+        .toast.error {
+            border-left: 3px solid #ef4444;
+        }
+
+        .toast.warning {
+            border-left: 3px solid #fbbf24;
+        }
+
+        .toast-icon {
+            font-size: 16px;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+            font-size: 14px;
+        }
+
+        .toast-message {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        /* Macro Calculation Display */
+        .macro-calc {
+            font-size: 11px;
+            color: #a0a0a0;
+            text-align: center;
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .macro-warning {
             color: #fbbf24;
         }
 
-        .debug-info {
-            font-family: monospace;
-            font-size: 12px;
-            color: #a0a0a0;
-            line-height: 1.6;
+        /* Settings/Test Panel */
+        .test-panel {
+            position: fixed;
+            bottom: -200px;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            transition: bottom 0.3s ease;
+            z-index: 3000;
         }
 
-        .debug-btn {
+        .test-panel.show {
+            bottom: 0;
+        }
+
+        .test-btn {
             background: #2a2a2a;
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #ffffff;
@@ -678,8 +648,8 @@
             border-radius: 8px;
             font-size: 12px;
             cursor: pointer;
-            margin-right: 10px;
-            margin-top: 10px;
+            margin-right: 8px;
+            margin-bottom: 8px;
         }
 
         .nutrition-description {
@@ -688,47 +658,42 @@
 
         @media (max-width: 480px) {
             .container {
-                padding: env(safe-area-inset-top, 10px) 15px env(safe-area-inset-bottom, 10px);
+                padding: env(safe-area-inset-top, 10px) 12px env(safe-area-inset-bottom, 10px);
             }
-
+            
             .app-title {
-                font-size: 28px;
+                font-size: 24px;
             }
-
-            .daily-totals {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
+            
+            .card {
+                padding: 12px;
             }
-
-            .total-value {
-                font-size: 20px;
-            }
-
+            
             .toast-container {
-                left: 10px;
-                right: 10px;
+                left: 12px;
+                right: 12px;
             }
 
-            .toast {
-                max-width: 100%;
+            .form-input {
+                font-size: 16px; /* Prevent zoom on iOS */
             }
         }
 
         .pull-to-refresh {
             position: absolute;
-            top: -50px;
+            top: -40px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 24px;
+            font-size: 20px;
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
     </style>
 </head>
 <body>
     <!-- Status Bar -->
     <div class="status-bar">
-        <div class="connection-status">
+        <div class="connection-status" onclick="toggleTestPanel()">
             <span class="status-dot" id="statusDot"></span>
             <span id="statusText">Checking...</span>
             <span class="unsynced-badge" id="unsyncedBadge" style="display: none;">0</span>
@@ -739,32 +704,17 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Save as Favorite Modal -->
-    <div class="favorite-modal" id="favoriteModal">
-        <div class="modal-content">
-            <h3 class="modal-title">Save as Favorite?</h3>
-            <input type="text" class="modal-input" id="favoriteName" placeholder="Enter a name for this meal">
-            <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeFavoriteModal()">Cancel</button>
-                <button class="modal-btn primary" onclick="saveFavorite()">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Debug Panel -->
-    <div class="debug-panel" id="debugPanel">
-        <div class="debug-title">🔧 Debug Mode</div>
-        <div class="debug-info" id="debugInfo"></div>
-        <div>
-            <button class="debug-btn" onclick="testAPIConnection()">Test API</button>
-            <button class="debug-btn" onclick="clearAllData()">Clear All Data</button>
-            <button class="debug-btn" onclick="syncNow()">Force Sync</button>
-            <button class="debug-btn" onclick="closeDebug()">Close</button>
-        </div>
+    <!-- Test Panel -->
+    <div class="test-panel" id="testPanel">
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #fbbf24;">⚙️ Connection Test</div>
+        <button class="test-btn" onclick="testAPIConnection()">Test Google Sheets</button>
+        <button class="test-btn" onclick="forceSync()">Force Sync</button>
+        <button class="test-btn" onclick="clearAllData()">Clear Data</button>
+        <button class="test-btn" onclick="toggleTestPanel()">Close</button>
     </div>
 
     <div class="pull-to-refresh" id="pullToRefresh">↓</div>
-
+    
     <div class="container">
         <div class="header">
             <h1 class="app-title" id="appTitle">Nutrition Tracker</h1>
@@ -807,62 +757,50 @@
         <div class="form-section">
             <h2 class="section-title">Add Entry</h2>
             <div class="card">
-                <!-- Multi-step Progress Display -->
-                <div class="submission-progress" id="submissionProgress">
-                    <div class="progress-step" id="step-validate">
-                        <div class="step-icon">
-                            <span class="step-spinner" style="display: none;"></span>
-                            <span class="step-checkmark" style="display: none;">✓</span>
-                            <span class="step-error" style="display: none;">✗</span>
-                        </div>
-                        <div class="step-text">Validating input...</div>
-                    </div>
-                    <div class="progress-step" id="step-local">
-                        <div class="step-icon">
-                            <span class="step-spinner" style="display: none;"></span>
-                            <span class="step-checkmark" style="display: none;">✓</span>
-                            <span class="step-error" style="display: none;">✗</span>
-                        </div>
-                        <div class="step-text">Saving locally...</div>
-                    </div>
-                    <div class="progress-step" id="step-cloud">
-                        <div class="step-icon">
-                            <span class="step-spinner" style="display: none;"></span>
-                            <span class="step-checkmark" style="display: none;">✓</span>
-                            <span class="step-error" style="display: none;">✗</span>
-                        </div>
-                        <div class="step-text">Syncing to cloud...</div>
-                    </div>
-                    <div class="progress-step" id="step-health">
-                        <div class="step-icon">
-                            <span class="step-spinner" style="display: none;"></span>
-                            <span class="step-checkmark" style="display: none;">✓</span>
-                            <span class="step-error" style="display: none;">✗</span>
-                        </div>
-                        <div class="step-text">Apple Health...</div>
-                    </div>
-                </div>
-
                 <form id="nutritionForm">
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="calories">Calories</label>
-                            <input type="number" class="form-input" id="calories" name="calories" placeholder="0" min="0" max="9999" inputmode="numeric">
+                            <div class="form-input-wrapper">
+                                <input type="number" class="form-input" id="calories" name="calories" placeholder="0" min="0" max="5000" inputmode="numeric">
+                                <div class="input-steppers">
+                                    <button type="button" class="stepper-btn" onclick="stepValue('calories', 50)">+</button>
+                                    <button type="button" class="stepper-btn" onclick="stepValue('calories', -50)">-</button>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="protein">Protein (g)</label>
-                            <input type="number" class="form-input" id="protein" name="protein" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
+                            <div class="form-input-wrapper">
+                                <input type="number" class="form-input" id="protein" name="protein" placeholder="0" min="0" max="500" step="0.1" inputmode="decimal">
+                                <div class="input-steppers">
+                                    <button type="button" class="stepper-btn" onclick="stepValue('protein', 5)">+</button>
+                                    <button type="button" class="stepper-btn" onclick="stepValue('protein', -5)">-</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="carbs">Carbs (g)</label>
-                            <input type="number" class="form-input" id="carbs" name="carbs" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
+                            <div class="form-input-wrapper">
+                                <input type="number" class="form-input" id="carbs" name="carbs" placeholder="0" min="0" max="500" step="0.1" inputmode="decimal">
+                                <div class="input-steppers">
+                                    <button type="button" class="stepper-btn" onclick="stepValue('carbs', 5)">+</button>
+                                    <button type="button" class="stepper-btn" onclick="stepValue('carbs', -5)">-</button>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="fat">Fat (g)</label>
-                            <input type="number" class="form-input" id="fat" name="fat" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
+                            <div class="form-input-wrapper">
+                                <input type="number" class="form-input" id="fat" name="fat" placeholder="0" min="0" max="500" step="0.1" inputmode="decimal">
+                                <div class="input-steppers">
+                                    <button type="button" class="stepper-btn" onclick="stepValue('fat', 5)">+</button>
+                                    <button type="button" class="stepper-btn" onclick="stepValue('fat', -5)">-</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -881,11 +819,23 @@
                         <input type="text" class="form-input" id="description" name="description" placeholder="e.g., Grilled chicken with vegetables">
                     </div>
 
-                    <button type="submit" class="submit-btn" id="submitBtn">Log Entry</button>
+                    <div class="macro-calc" id="macroCalc" style="display: none;"></div>
 
-                    <!-- Apple Health Button (shown on iOS) -->
-                    <button type="button" class="apple-health-btn" id="appleHealthBtn" onclick="manualAppleHealth()">
-                        🍎 Log to Apple Health
+                    <button type="submit" class="submit-btn" id="submitBtn">Log Entry</button>
+                    
+                    <!-- Apple Health Button (iOS only) -->
+                    <button type="button" class="apple-health-btn" id="appleHealthBtn" onclick="logToAppleHealth()">
+                        📱 Log to Apple Health
+                    </button>
+
+                    <!-- Undo Button -->
+                    <button type="button" class="undo-btn" id="undoBtn" onclick="undoLastEntry()">
+                        ↶ Undo Last Entry
+                    </button>
+
+                    <!-- Save as Favorite Button -->
+                    <button type="button" class="add-favorite-btn" id="addFavoriteBtn" onclick="showAddFavorite()">
+                        ⭐ Save as Favorite
                     </button>
                 </form>
             </div>
@@ -896,10 +846,10 @@
             <div class="favorites-grid" id="favoritesGrid">
                 <!-- Favorites will be added dynamically -->
             </div>
-
+            
             <div class="quick-add-section">
-                <button class="quick-add-btn" id="quickCal">+100 Cal</button>
-                <button class="quick-add-btn" id="quickProtein">+10g Protein</button>
+                <button class="quick-add-btn" onclick="quickAdd('calories', 100)">+100 Cal</button>
+                <button class="quick-add-btn" onclick="quickAdd('protein', 10)">+10g Pro</button>
             </div>
         </div>
 
@@ -912,9 +862,9 @@
     </div>
 
     <script>
-        // IMPORTANT: Paste your Google Apps Script URL here
+        // API Configuration - PASTE YOUR GOOGLE APPS SCRIPT URL HERE
         const API_URL = 'https://script.google.com/macros/s/AKfycbzZCRtQwUBAT76gBkM5uPlbK4cIabcorNSKk6p1P2HzSr_3AWlegpLiAW_rRUhaL9MvPA/exec';
-
+        
         // Configuration
         const DAILY_GOALS = {
             calories: 2000,
@@ -923,40 +873,38 @@
             fat: 65
         };
 
-        // Global state
-        let dailyTotals = {
-            calories: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0
-        };
+        const MAX_FAVORITES = 10;
 
+        // Global state
+        let dailyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
         let todaysEntries = [];
         let unsyncedQueue = [];
-        let FAVORITE_MEALS = {};
+        let favoritesArray = [];
         let isOnline = navigator.onLine;
         let apiConnected = false;
-        let debugMode = false;
-        let debugTaps = 0;
         let lastSyncTime = null;
-        let currentFormData = null;
-        let syncInterval = null;
+        let lastEntry = null;
+        let toastCount = 0;
+        let inputDebounceTimer = null;
 
         // DOM elements
         const form = document.getElementById('nutritionForm');
         const submitBtn = document.getElementById('submitBtn');
         const historyContainer = document.getElementById('historyContainer');
         const dateDisplay = document.getElementById('dateDisplay');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const unsyncedBadge = document.getElementById('unsyncedBadge');
-        const syncInfo = document.getElementById('syncInfo');
-        const submissionProgress = document.getElementById('submissionProgress');
-        const toastContainer = document.getElementById('toastContainer');
-        const favoriteModal = document.getElementById('favoriteModal');
-        const debugPanel = document.getElementById('debugPanel');
-        const appTitle = document.getElementById('appTitle');
         const appleHealthBtn = document.getElementById('appleHealthBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const addFavoriteBtn = document.getElementById('addFavoriteBtn');
+        const testPanel = document.getElementById('testPanel');
+
+        // Cached DOM queries
+        const domCache = {};
+        function $(id) {
+            if (!domCache[id]) {
+                domCache[id] = document.getElementById(id);
+            }
+            return domCache[id];
+        }
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -968,25 +916,22 @@
             loadUnsyncedQueue();
             checkAPIConnection();
             startAutoSync();
-            checkIfIOS();
+            
+            if (isIOS()) {
+                document.body.classList.add('ios');
+            }
         });
 
         function initializeApp() {
-            // Set up viewport for iOS
-            if (window.navigator.standalone) {
-                document.body.classList.add('standalone');
-            }
-
             // Prevent zoom on input focus (iOS)
-            const inputs = document.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
+            const viewport = document.querySelector('meta[name="viewport"]');
+            
+            document.querySelectorAll('input, select, textarea').forEach(input => {
                 input.addEventListener('focus', () => {
-                    const viewport = document.querySelector('meta[name="viewport"]');
                     viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
                 });
 
                 input.addEventListener('blur', () => {
-                    const viewport = document.querySelector('meta[name="viewport"]');
                     viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
                 });
             });
@@ -1003,32 +948,33 @@
             // Form submission
             form.addEventListener('submit', handleFormSubmit);
 
-            // Favorite buttons delegation
-            document.getElementById('favoritesGrid').addEventListener('click', (e) => {
-                if (e.target.classList.contains('favorite-btn')) {
-                    const favorite = e.target.dataset.favorite;
-                    loadFavoriteMeal(favorite);
+            // Input change handlers with debouncing
+            ['calories', 'protein', 'carbs', 'fat'].forEach(field => {
+                $(field).addEventListener('input', debounce(() => {
+                    updateMacroCalculation();
+                    triggerHaptic();
+                }, 300));
+            });
 
-                    // Haptic feedback
-                    if (navigator.vibrate) {
-                        navigator.vibrate(50);
-                    }
+            // Favorites grid event delegation
+            $('favoritesGrid').addEventListener('click', (e) => {
+                if (e.target.classList.contains('favorite-btn')) {
+                    loadFavorite(e.target.dataset.favoriteId);
+                    triggerHaptic();
                 } else if (e.target.classList.contains('delete-favorite')) {
                     e.stopPropagation();
-                    const favoriteKey = e.target.dataset.favorite;
-                    deleteFavorite(favoriteKey);
+                    deleteFavorite(e.target.dataset.favoriteId);
                 }
             });
 
-            // Quick add buttons
-            document.getElementById('quickCal').addEventListener('click', () => {
-                const currentCal = parseFloat(document.getElementById('calories').value) || 0;
-                document.getElementById('calories').value = currentCal + 100;
-            });
-
-            document.getElementById('quickProtein').addEventListener('click', () => {
-                const currentProtein = parseFloat(document.getElementById('protein').value) || 0;
-                document.getElementById('protein').value = currentProtein + 10;
+            // Touch events for favorites
+            $('favoritesGrid').addEventListener('touchstart', (e) => {
+                if (e.target.classList.contains('favorite-btn')) {
+                    e.target.classList.add('touch');
+                    setTimeout(() => {
+                        e.target.classList.remove('touch');
+                    }, 2000);
+                }
             });
 
             // Online/offline detection
@@ -1043,27 +989,759 @@
                 updateConnectionStatus('offline');
             });
 
-            // Debug mode (triple tap title)
-            appTitle.addEventListener('click', () => {
-                debugTaps++;
-                if (debugTaps === 3) {
-                    toggleDebugMode();
-                }
-                setTimeout(() => { debugTaps = 0; }, 1000);
-            });
-
             // Pull to refresh
             setupPullToRefresh();
 
-            // Swipe to delete
+            // Swipe to delete history
             setupSwipeToDelete();
+
+            // Button haptic feedback
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('button, .btn, [onclick]')) {
+                    triggerHaptic();
+                }
+            });
+        }
+
+        function debounce(func, wait) {
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(inputDebounceTimer);
+                    func(...args);
+                };
+                clearTimeout(inputDebounceTimer);
+                inputDebounceTimer = setTimeout(later, wait);
+            };
+        }
+
+        function isIOS() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        function triggerHaptic() {
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+
+            const formData = getFormData();
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            try {
+                // Save locally first
+                addEntryToLocal(formData);
+                lastEntry = { ...formData };
+
+                // Try to sync with server
+                if (isOnline && apiConnected) {
+                    try {
+                        await submitToServer(formData);
+                        showToast('success', 'Synced!', 'Entry saved and synced to cloud');
+                    } catch (error) {
+                        addToUnsyncedQueue(formData);
+                        showToast('warning', 'Saved Locally', 'Will sync when online');
+                    }
+                } else {
+                    addToUnsyncedQueue(formData);
+                    showToast('info', 'Saved Offline', 'Will sync when connection restored');
+                }
+
+                // Success animation
+                showSuccessAnimation();
+                
+                // Update UI
+                updateTotalsDisplay();
+                updateHistoryDisplay();
+                
+                // Show action buttons
+                showPostSubmitButtons(formData);
+                
+                // Clear form with delay
+                setTimeout(() => {
+                    clearForm();
+                }, 1500);
+
+            } catch (error) {
+                showToast('error', 'Save Failed', 'Could not save entry');
+            } finally {
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Log Entry';
+                    submitBtn.classList.remove('success');
+                }, 2000);
+            }
+        }
+
+        function showSuccessAnimation() {
+            submitBtn.classList.add('success');
+            submitBtn.innerHTML = '<span class="success-checkmark">✓</span>';
+            triggerHaptic(50);
+            
+            setTimeout(() => {
+                submitBtn.innerHTML = 'Entry Logged!';
+            }, 500);
+        }
+
+        function showPostSubmitButtons(formData) {
+            // Show Apple Health button on iOS
+            if (isIOS()) {
+                appleHealthBtn.classList.add('show');
+                setTimeout(() => {
+                    appleHealthBtn.classList.remove('show');
+                }, 8000);
+            }
+
+            // Show undo button
+            undoBtn.classList.add('show');
+            setTimeout(() => {
+                undoBtn.classList.remove('show');
+            }, 5000);
+
+            // Show add to favorites if has description
+            if (formData.description && formData.description.trim() && favoritesArray.length < MAX_FAVORITES) {
+                addFavoriteBtn.classList.add('show');
+                setTimeout(() => {
+                    addFavoriteBtn.classList.remove('show');
+                }, 8000);
+            }
+        }
+
+        function validateForm() {
+            const calories = parseFloat($('calories').value) || 0;
+            const protein = parseFloat($('protein').value) || 0;
+            const carbs = parseFloat($('carbs').value) || 0;
+            const fat = parseFloat($('fat').value) || 0;
+
+            if (calories < 0 || calories > 5000) {
+                showToast('error', 'Invalid Input', 'Calories must be 0-5000');
+                return false;
+            }
+
+            if (protein < 0 || protein > 500) {
+                showToast('error', 'Invalid Input', 'Protein must be 0-500g');
+                return false;
+            }
+
+            if (carbs < 0 || carbs > 500) {
+                showToast('error', 'Invalid Input', 'Carbs must be 0-500g');
+                return false;
+            }
+
+            if (fat < 0 || fat > 500) {
+                showToast('error', 'Invalid Input', 'Fat must be 0-500g');
+                return false;
+            }
+
+            if (calories === 0 && protein === 0 && carbs === 0 && fat === 0) {
+                showToast('error', 'Empty Entry', 'Please enter at least one value');
+                return false;
+            }
+
+            return true;
+        }
+
+        function getFormData() {
+            return {
+                calories: parseFloat($('calories').value) || 0,
+                protein: parseFloat($('protein').value) || 0,
+                carbs: parseFloat($('carbs').value) || 0,
+                fat: parseFloat($('fat').value) || 0,
+                mealType: $('mealType').value,
+                description: $('description').value.trim(),
+                timestamp: new Date().toISOString(),
+                date: new Date().toDateString(),
+                id: Date.now().toString()
+            };
+        }
+
+        async function submitToServer(data) {
+            if (API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                throw new Error('API not configured');
+            }
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: JSON.stringify(data),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                
+                lastSyncTime = new Date();
+                localStorage.setItem('lastSyncTime', lastSyncTime.toISOString());
+                updateSyncInfo();
+                
+                return { success: true };
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout');
+                }
+                throw error;
+            }
+        }
+
+        function updateMacroCalculation() {
+            const protein = parseFloat($('protein').value) || 0;
+            const carbs = parseFloat($('carbs').value) || 0;
+            const fat = parseFloat($('fat').value) || 0;
+            const calories = parseFloat($('calories').value) || 0;
+
+            const calculatedCals = (protein * 4) + (carbs * 4) + (fat * 9);
+            const macroCalc = $('macroCalc');
+
+            if (protein || carbs || fat) {
+                macroCalc.style.display = 'block';
+                
+                if (calories === 0) {
+                    macroCalc.innerHTML = `Calculated: ${Math.round(calculatedCals)} calories`;
+                    macroCalc.className = 'macro-calc';
+                    
+                    // Auto-fill calories if empty
+                    if (calculatedCals > 0) {
+                        $('calories').value = Math.round(calculatedCals);
+                    }
+                } else {
+                    const diff = Math.abs(calories - calculatedCals);
+                    const threshold = calories * 0.2; // 20% threshold
+                    
+                    if (diff > threshold) {
+                        macroCalc.innerHTML = `⚠️ Macros suggest ${Math.round(calculatedCals)} calories`;
+                        macroCalc.className = 'macro-calc macro-warning';
+                    } else {
+                        macroCalc.innerHTML = `✓ Macros match calories`;
+                        macroCalc.className = 'macro-calc';
+                    }
+                }
+            } else {
+                macroCalc.style.display = 'none';
+            }
+        }
+
+        function stepValue(fieldId, amount) {
+            const input = $(fieldId);
+            const currentValue = parseFloat(input.value) || 0;
+            const newValue = Math.max(0, currentValue + amount);
+            input.value = newValue;
+            updateMacroCalculation();
+        }
+
+        function quickAdd(field, amount) {
+            const input = $(field);
+            const currentValue = parseFloat(input.value) || 0;
+            input.value = currentValue + amount;
+            updateMacroCalculation();
+        }
+
+        function logToAppleHealth() {
+            if (!lastEntry && !getCurrentFormData()) {
+                showToast('error', 'No Data', 'Please submit an entry first');
+                return;
+            }
+
+            const data = lastEntry || getCurrentFormData();
+            const url = `shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(JSON.stringify({
+                calories: data.calories,
+                protein: data.protein,
+                carbs: data.carbs,
+                fat: data.fat,
+                mealType: data.mealType
+            }))}`;
+
+            // Direct navigation - works best in Safari
+            window.location.href = url;
+            
+            // Hide button after use
+            appleHealthBtn.classList.remove('show');
+            
+            // Show feedback after delay
+            setTimeout(() => {
+                showToast('info', 'Opening Shortcuts', 'Check if Apple Health logged the entry');
+            }, 1000);
+        }
+
+        function getCurrentFormData() {
+            const calories = parseFloat($('calories').value) || 0;
+            const protein = parseFloat($('protein').value) || 0;
+            const carbs = parseFloat($('carbs').value) || 0;
+            const fat = parseFloat($('fat').value) || 0;
+
+            if (calories || protein || carbs || fat) {
+                return {
+                    calories,
+                    protein,
+                    carbs,
+                    fat,
+                    mealType: $('mealType').value
+                };
+            }
+            return null;
+        }
+
+        function undoLastEntry() {
+            if (!lastEntry) {
+                showToast('error', 'Nothing to Undo', 'No recent entry found');
+                return;
+            }
+
+            if (confirm('Undo last entry?')) {
+                // Remove from totals
+                dailyTotals.calories -= lastEntry.calories;
+                dailyTotals.protein -= lastEntry.protein;
+                dailyTotals.carbs -= lastEntry.carbs;
+                dailyTotals.fat -= lastEntry.fat;
+
+                // Remove from entries
+                todaysEntries = todaysEntries.filter(entry => entry.id !== lastEntry.id);
+
+                // Update localStorage
+                localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
+                localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
+
+                // Update displays
+                updateTotalsDisplay();
+                updateHistoryDisplay();
+                
+                showToast('info', 'Undone', 'Last entry removed');
+                lastEntry = null;
+                undoBtn.classList.remove('show');
+            }
+        }
+
+        function showAddFavorite() {
+            if (!lastEntry) return;
+
+            const name = prompt('Name this favorite:', lastEntry.description || '');
+            if (name && name.trim()) {
+                addToFavorites(name.trim(), lastEntry);
+                addFavoriteBtn.classList.remove('show');
+            }
+        }
+
+        function addToFavorites(name, data) {
+            if (favoritesArray.length >= MAX_FAVORITES) {
+                showToast('warning', 'Limit Reached', `Maximum ${MAX_FAVORITES} favorites allowed`);
+                return;
+            }
+
+            const favorite = {
+                id: Date.now().toString(),
+                name: name,
+                calories: data.calories,
+                protein: data.protein,
+                carbs: data.carbs,
+                fat: data.fat,
+                mealType: data.mealType,
+                description: data.description
+            };
+
+            favoritesArray.push(favorite);
+            localStorage.setItem('favorites', JSON.stringify(favoritesArray));
+            displayFavorites();
+            showToast('success', 'Favorite Saved', `"${name}" added to favorites`);
+        }
+
+        function loadFavorites() {
+            const saved = localStorage.getItem('favorites');
+            if (saved) {
+                favoritesArray = JSON.parse(saved);
+                displayFavorites();
+            }
+        }
+
+        function displayFavorites() {
+            const grid = $('favoritesGrid');
+            grid.innerHTML = '';
+
+            if (favoritesArray.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #a0a0a0; padding: 15px; font-size: 13px;">No favorites yet. Save entries to build your collection!</p>';
+                return;
+            }
+
+            favoritesArray.forEach(fav => {
+                const btn = document.createElement('button');
+                btn.className = 'favorite-btn';
+                btn.dataset.favoriteId = fav.id;
+                btn.innerHTML = `
+                    <div class="favorite-name">${fav.name}</div>
+                    <div class="favorite-macros">${Math.round(fav.calories)}cal • ${Math.round(fav.protein)}p • ${Math.round(fav.carbs)}c • ${Math.round(fav.fat)}f</div>
+                    <button class="delete-favorite" data-favorite-id="${fav.id}">×</button>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadFavorite(favoriteId) {
+            const favorite = favoritesArray.find(f => f.id === favoriteId);
+            if (favorite) {
+                $('calories').value = favorite.calories;
+                $('protein').value = favorite.protein;
+                $('carbs').value = favorite.carbs;
+                $('fat').value = favorite.fat;
+                $('mealType').value = favorite.mealType;
+                $('description').value = favorite.description || '';
+                updateMacroCalculation();
+            }
+        }
+
+        function deleteFavorite(favoriteId) {
+            if (confirm('Delete this favorite?')) {
+                favoritesArray = favoritesArray.filter(f => f.id !== favoriteId);
+                localStorage.setItem('favorites', JSON.stringify(favoritesArray));
+                displayFavorites();
+                showToast('info', 'Deleted', 'Favorite removed');
+            }
+        }
+
+        function showToast(type, title, message, duration = 3000) {
+            // Limit to 2 toasts
+            if (toastCount >= 2) {
+                return;
+            }
+
+            toastCount++;
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const iconMap = {
+                'success': '✓',
+                'error': '✗',
+                'warning': '⚠',
+                'info': 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${iconMap[type]}</span>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+
+            $('toastContainer').appendChild(toast);
+
+            // Trigger show animation
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.2s ease reverse';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    toastCount--;
+                }, 200);
+            }, duration);
+        }
+
+        // Rest of the functions (connection, sync, etc.) - optimized versions
+        async function checkAPIConnection() {
+            if (API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                updateConnectionStatus('not-configured');
+                return;
+            }
+
+            if (!isOnline) {
+                updateConnectionStatus('offline');
+                return;
+            }
+
+            try {
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(), 3000);
+
+                await fetch(API_URL, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                });
+
+                apiConnected = true;
+                updateConnectionStatus('connected');
+            } catch (error) {
+                apiConnected = false;
+                updateConnectionStatus('error');
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            const dot = $('statusDot');
+            const text = $('statusText');
+
+            switch(status) {
+                case 'connected':
+                    dot.className = 'status-dot connected';
+                    text.textContent = 'Connected';
+                    break;
+                case 'offline':
+                    dot.className = 'status-dot error';
+                    text.textContent = 'Offline';
+                    break;
+                case 'not-configured':
+                    dot.className = 'status-dot';
+                    text.textContent = 'Setup needed';
+                    showToast('warning', 'Setup Required', 'Configure Google Sheets URL');
+                    break;
+                case 'error':
+                    dot.className = 'status-dot error';
+                    text.textContent = 'Error';
+                    break;
+            }
+            updateUnsyncedBadge();
+        }
+
+        function addEntryToLocal(entry) {
+            todaysEntries.unshift(entry);
+            
+            dailyTotals.calories += entry.calories;
+            dailyTotals.protein += entry.protein;
+            dailyTotals.carbs += entry.carbs;
+            dailyTotals.fat += entry.fat;
+
+            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
+            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
+            localStorage.setItem('lastEntryDate', new Date().toDateString());
+        }
+
+        function addToUnsyncedQueue(entry) {
+            unsyncedQueue.push(entry);
+            localStorage.setItem('unsyncedQueue', JSON.stringify(unsyncedQueue));
+            updateUnsyncedBadge();
+        }
+
+        function updateUnsyncedBadge() {
+            const badge = $('unsyncedBadge');
+            if (unsyncedQueue.length > 0) {
+                badge.textContent = unsyncedQueue.length;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function loadUnsyncedQueue() {
+            const saved = localStorage.getItem('unsyncedQueue');
+            if (saved) {
+                unsyncedQueue = JSON.parse(saved);
+                updateUnsyncedBadge();
+            }
+        }
+
+        async function processUnsyncedQueue() {
+            if (!unsyncedQueue.length || !isOnline || !apiConnected) return;
+
+            const queue = [...unsyncedQueue];
+            const failed = [];
+
+            for (const entry of queue) {
+                try {
+                    await submitToServer(entry);
+                    unsyncedQueue = unsyncedQueue.filter(e => e.id !== entry.id);
+                } catch (error) {
+                    failed.push(entry);
+                }
+            }
+
+            unsyncedQueue = failed;
+            localStorage.setItem('unsyncedQueue', JSON.stringify(unsyncedQueue));
+            updateUnsyncedBadge();
+
+            if (!failed.length && queue.length) {
+                showToast('success', 'Synced', `${queue.length} entries uploaded`);
+            }
+        }
+
+        function updateSyncInfo() {
+            const syncInfo = $('syncInfo');
+            if (lastSyncTime) {
+                const diff = Date.now() - lastSyncTime.getTime();
+                const minutes = Math.floor(diff / 60000);
+                
+                if (minutes < 1) {
+                    syncInfo.textContent = 'Just synced';
+                } else if (minutes < 60) {
+                    syncInfo.textContent = `${minutes}m ago`;
+                } else {
+                    const hours = Math.floor(minutes / 60);
+                    syncInfo.textContent = `${hours}h ago`;
+                }
+            } else {
+                syncInfo.textContent = 'Never synced';
+            }
+        }
+
+        function startAutoSync() {
+            setInterval(() => {
+                if (unsyncedQueue.length && isOnline) {
+                    processUnsyncedQueue();
+                }
+                updateSyncInfo();
+            }, 30000);
+        }
+
+        function loadTodaysData() {
+            const lastDate = localStorage.getItem('lastEntryDate');
+            const today = new Date().toDateString();
+
+            if (lastDate === today) {
+                const savedEntries = localStorage.getItem('todaysEntries');
+                const savedTotals = localStorage.getItem('dailyTotals');
+
+                if (savedEntries) {
+                    todaysEntries = JSON.parse(savedEntries);
+                }
+
+                if (savedTotals) {
+                    dailyTotals = JSON.parse(savedTotals);
+                }
+            } else {
+                todaysEntries = [];
+                dailyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+                localStorage.removeItem('todaysEntries');
+                localStorage.removeItem('dailyTotals');
+            }
+
+            updateTotalsDisplay();
+            updateHistoryDisplay();
+        }
+
+        function updateTotalsDisplay() {
+            animateValue('totalCalories', Math.round(dailyTotals.calories));
+            animateValue('totalProtein', Math.round(dailyTotals.protein) + 'g');
+            animateValue('totalCarbs', Math.round(dailyTotals.carbs) + 'g');
+            animateValue('totalFat', Math.round(dailyTotals.fat) + 'g');
+
+            updateProgressBar('caloriesProgress', dailyTotals.calories, DAILY_GOALS.calories);
+            updateProgressBar('proteinProgress', dailyTotals.protein, DAILY_GOALS.protein);
+            updateProgressBar('carbsProgress', dailyTotals.carbs, DAILY_GOALS.carbs);
+            updateProgressBar('fatProgress', dailyTotals.fat, DAILY_GOALS.fat);
+        }
+
+        function animateValue(elementId, newValue) {
+            const element = $(elementId);
+            element.textContent = newValue;
+            element.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        function updateProgressBar(elementId, current, goal) {
+            const percentage = Math.min((current / goal) * 100, 100);
+            $(elementId).style.width = percentage + '%';
+        }
+
+        function updateHistoryDisplay() {
+            const container = historyContainer;
+            container.innerHTML = '';
+
+            if (!todaysEntries.length) {
+                container.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 20px; font-size: 13px;">No entries today</p>';
+                return;
+            }
+
+            todaysEntries.slice(0, 5).forEach((entry, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="history-header">
+                        <div>
+                            <strong>${entry.mealType}</strong>
+                            ${entry.description ? `<div style="font-size: 11px; color: #a0a0a0; margin-top: 2px;">${entry.description}</div>` : ''}
+                        </div>
+                        <span class="history-time">${formatTime(entry.timestamp)}</span>
+                    </div>
+                    <div class="history-details">
+                        <div class="history-macro">
+                            <div class="history-macro-value">${Math.round(entry.calories)}</div>
+                            <div class="history-macro-label">Cal</div>
+                        </div>
+                        <div class="history-macro">
+                            <div class="history-macro-value">${Math.round(entry.protein)}g</div>
+                            <div class="history-macro-label">Pro</div>
+                        </div>
+                        <div class="history-macro">
+                            <div class="history-macro-value">${Math.round(entry.carbs)}g</div>
+                            <div class="history-macro-label">Carbs</div>
+                        </div>
+                        <div class="history-macro">
+                            <div class="history-macro-value">${Math.round(entry.fat)}g</div>
+                            <div class="history-macro-label">Fat</div>
+                        </div>
+                    </div>
+                    <div class="history-delete" onclick="deleteEntry(${index})">Delete</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function deleteEntry(index) {
+            const entry = todaysEntries[index];
+            
+            dailyTotals.calories -= entry.calories;
+            dailyTotals.protein -= entry.protein;
+            dailyTotals.carbs -= entry.carbs;
+            dailyTotals.fat -= entry.fat;
+
+            todaysEntries.splice(index, 1);
+
+            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
+            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
+
+            updateTotalsDisplay();
+            updateHistoryDisplay();
+            showToast('info', 'Deleted', 'Entry removed');
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+        }
+
+        function clearForm() {
+            form.reset();
+            $('macroCalc').style.display = 'none';
+        }
+
+        function updateDateDisplay() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            dateDisplay.textContent = now.toLocaleDateString('en-US', options);
         }
 
         function setupPullToRefresh() {
             let startY = 0;
             let pullDistance = 0;
             const container = document.querySelector('.container');
-            const pullToRefresh = document.getElementById('pullToRefresh');
+            const pullIcon = $('pullToRefresh');
 
             container.addEventListener('touchstart', (e) => {
                 startY = e.touches[0].clientY;
@@ -1072,19 +1750,19 @@
             container.addEventListener('touchmove', (e) => {
                 if (window.scrollY === 0) {
                     pullDistance = e.touches[0].clientY - startY;
-                    if (pullDistance > 0 && pullDistance < 100) {
-                        pullToRefresh.style.top = (pullDistance - 50) + 'px';
-                        pullToRefresh.style.opacity = pullDistance / 100;
+                    if (pullDistance > 0 && pullDistance < 80) {
+                        pullIcon.style.top = (pullDistance - 40) + 'px';
+                        pullIcon.style.opacity = pullDistance / 80;
                     }
                 }
             });
 
             container.addEventListener('touchend', () => {
-                if (pullDistance > 60) {
-                    syncNow();
+                if (pullDistance > 50) {
+                    forceSync();
                 }
-                pullToRefresh.style.top = '-50px';
-                pullToRefresh.style.opacity = '0';
+                pullIcon.style.top = '-40px';
+                pullIcon.style.opacity = '0';
                 pullDistance = 0;
             });
         }
@@ -1103,8 +1781,8 @@
             historyContainer.addEventListener('touchmove', (e) => {
                 if (currentItem) {
                     const deltaX = e.touches[0].clientX - startX;
-                    if (deltaX < -50) {
-                        currentItem.style.transform = `translateX(${Math.max(deltaX, -80)}px)`;
+                    if (deltaX < -30) {
+                        currentItem.style.transform = `translateX(${Math.max(deltaX, -70)}px)`;
                     }
                 }
             });
@@ -1112,12 +1790,8 @@
             historyContainer.addEventListener('touchend', (e) => {
                 if (currentItem) {
                     const deltaX = e.changedTouches[0].clientX - startX;
-                    if (deltaX < -50) {
-                        currentItem.classList.add('swipe-left');
-                        const deleteBtn = currentItem.querySelector('.history-delete');
-                        if (deleteBtn) {
-                            deleteBtn.style.display = 'flex';
-                        }
+                    if (deltaX < -40) {
+                        currentItem.querySelector('.history-delete').style.display = 'flex';
                     } else {
                         currentItem.style.transform = '';
                     }
@@ -1126,802 +1800,29 @@
             });
         }
 
-        async function checkAPIConnection() {
-            if (API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                updateConnectionStatus('not-configured');
-                return;
-            }
-
-            if (!isOnline) {
-                updateConnectionStatus('offline');
-                return;
-            }
-
-            try {
-                // Try to ping the API with a timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-                await fetch(API_URL, {
-                    method: 'GET',
-                    mode: 'no-cors',
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                // With no-cors, we can't read the response, so assume success
-                apiConnected = true;
-                updateConnectionStatus('connected');
-
-            } catch (error) {
-                apiConnected = false;
-                updateConnectionStatus('error');
-            }
-        }
-
-        function updateConnectionStatus(status) {
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-
-            switch(status) {
-                case 'connected':
-                    dot.className = 'status-dot connected';
-                    text.textContent = 'Connected';
-                    break;
-                case 'offline':
-                    dot.className = 'status-dot error';
-                    text.textContent = 'Offline';
-                    break;
-                case 'not-configured':
-                    dot.className = 'status-dot';
-                    text.textContent = 'Not configured';
-                    showToast('warning', 'Setup Required', 'Please add your Google Apps Script URL', 5000);
-                    break;
-                case 'error':
-                    dot.className = 'status-dot error';
-                    text.textContent = 'Connection error';
-                    break;
-                default:
-                    dot.className = 'status-dot';
-                    text.textContent = 'Checking...';
-            }
-
-            updateUnsyncedBadge();
-        }
-
-        function updateUnsyncedBadge() {
-            const badge = document.getElementById('unsyncedBadge');
-            if (unsyncedQueue.length > 0) {
-                badge.textContent = unsyncedQueue.length;
-                badge.style.display = 'inline-block';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        function updateSyncInfo() {
-            const syncInfo = document.getElementById('syncInfo');
-            if (lastSyncTime) {
-                const diff = Date.now() - lastSyncTime.getTime();
-                const minutes = Math.floor(diff / 60000);
-
-                if (minutes < 1) {
-                    syncInfo.textContent = 'Just synced';
-                } else if (minutes < 60) {
-                    syncInfo.textContent = `Synced ${minutes}m ago`;
-                } else {
-                    const hours = Math.floor(minutes / 60);
-                    syncInfo.textContent = `Synced ${hours}h ago`;
-                }
-            } else {
-                syncInfo.textContent = 'Never synced';
-            }
-        }
-
-        function startAutoSync() {
-            // Auto sync every 30 seconds if there are unsynced items
-            syncInterval = setInterval(() => {
-                if (unsyncedQueue.length > 0 && isOnline) {
-                    processUnsyncedQueue();
-                }
-                updateSyncInfo();
-            }, 30000);
-        }
-
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-
-            // Show progress
-            submissionProgress.classList.add('active');
-            submitBtn.disabled = true;
-
-            // Step 1: Validate
-            updateProgressStep('validate', 'active');
-
-            if (!validateForm()) {
-                updateProgressStep('validate', 'error', 'Validation failed');
-                setTimeout(() => {
-                    submissionProgress.classList.remove('active');
-                    submitBtn.disabled = false;
-                }, 2000);
-                return;
-            }
-
-            const formData = getFormData();
-            currentFormData = formData;
-
-            updateProgressStep('validate', 'completed');
-
-            // Step 2: Save locally
-            updateProgressStep('local', 'active');
-
-            try {
-                await delay(500); // Simulate processing
-                addEntryToLocal(formData);
-                updateProgressStep('local', 'completed');
-            } catch (error) {
-                updateProgressStep('local', 'error', 'Failed to save locally');
-                showToast('error', 'Save Failed', 'Could not save entry locally');
-                submitBtn.disabled = false;
-                return;
-            }
-
-            // Step 3: Sync to cloud
-            updateProgressStep('cloud', 'active');
-
-            if (isOnline && apiConnected) {
-                try {
-                    await submitToServer(formData);
-                    updateProgressStep('cloud', 'completed');
-                } catch (error) {
-                    updateProgressStep('cloud', 'error', 'Queued for sync');
-                    addToUnsyncedQueue(formData);
-                    showToast('warning', 'Saved Offline', 'Will sync when connection is restored');
-                }
-            } else {
-                updateProgressStep('cloud', 'error', 'Offline - will sync later');
-                addToUnsyncedQueue(formData);
-            }
-
-            // Step 4: Apple Health
-            if (checkIfIOS()) {
-                updateProgressStep('health', 'active');
-                const healthSuccess = await triggerAppleHealthIntegration(formData);
-                if (healthSuccess) {
-                    updateProgressStep('health', 'completed');
-                } else {
-                    updateProgressStep('health', 'error', 'Manual action needed');
-                    appleHealthBtn.classList.add('show');
-                }
-            } else {
-                // Hide health step if not iOS
-                document.getElementById('step-health').style.display = 'none';
-            }
-
-            // Success!
-            setTimeout(() => {
-                submissionProgress.classList.remove('active');
-                submitBtn.disabled = false;
-                clearForm();
-                updateTotalsDisplay();
-                updateHistoryDisplay();
-
-                // Ask to save as favorite
-                setTimeout(() => {
-                    if (formData.description && formData.description.trim() !== '') {
-                        showFavoriteModal();
-                    }
-                }, 500);
-
-                showToast('success', 'Entry Added!', 'Successfully logged your nutrition');
-
-                // Haptic feedback
-                if (navigator.vibrate) {
-                    navigator.vibrate([50, 50, 50]);
-                }
-            }, 1000);
-        }
-
-        function updateProgressStep(stepId, status, customText = null) {
-            const step = document.getElementById(`step-${stepId}`);
-            const spinner = step.querySelector('.step-spinner');
-            const checkmark = step.querySelector('.step-checkmark');
-            const error = step.querySelector('.step-error');
-            const text = step.querySelector('.step-text');
-
-            // Reset all states
-            step.classList.remove('active', 'completed', 'error');
-            spinner.style.display = 'none';
-            checkmark.style.display = 'none';
-            error.style.display = 'none';
-
-            switch(status) {
-                case 'active':
-                    step.classList.add('active');
-                    spinner.style.display = 'block';
-                    break;
-                case 'completed':
-                    step.classList.add('completed');
-                    checkmark.style.display = 'block';
-                    break;
-                case 'error':
-                    step.classList.add('error');
-                    error.style.display = 'block';
-                    if (customText) {
-                        text.textContent = customText;
-                    }
-                    break;
-            }
-        }
-
-        function delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        function validateForm() {
-            const calories = parseFloat(document.getElementById('calories').value) || 0;
-            const protein = parseFloat(document.getElementById('protein').value) || 0;
-            const carbs = parseFloat(document.getElementById('carbs').value) || 0;
-            const fat = parseFloat(document.getElementById('fat').value) || 0;
-
-            if (calories < 0 || calories > 9999) {
-                showToast('error', 'Invalid Input', 'Calories must be between 0 and 9999');
-                return false;
-            }
-
-            if (protein < 0 || protein > 999) {
-                showToast('error', 'Invalid Input', 'Protein must be between 0 and 999g');
-                return false;
-            }
-
-            if (carbs < 0 || carbs > 999) {
-                showToast('error', 'Invalid Input', 'Carbs must be between 0 and 999g');
-                return false;
-            }
-
-            if (fat < 0 || fat > 999) {
-                showToast('error', 'Invalid Input', 'Fat must be between 0 and 999g');
-                return false;
-            }
-
-            // At least one macro should be entered
-            if (calories === 0 && protein === 0 && carbs === 0 && fat === 0) {
-                showToast('error', 'Empty Entry', 'Please enter at least one value');
-                return false;
-            }
-
-            return true;
-        }
-
-        function getFormData() {
-            return {
-                calories: parseFloat(document.getElementById('calories').value) || 0,
-                protein: parseFloat(document.getElementById('protein').value) || 0,
-                carbs: parseFloat(document.getElementById('carbs').value) || 0,
-                fat: parseFloat(document.getElementById('fat').value) || 0,
-                mealType: document.getElementById('mealType').value,
-                description: document.getElementById('description').value.trim(),
-                timestamp: new Date().toISOString(),
-                date: new Date().toDateString(),
-                id: Date.now().toString()
-            };
-        }
-
-        async function submitToServer(data) {
-            if (API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                throw new Error('API not configured');
-            }
-
-            // Use no-cors mode for Google Apps Script
-            // We can't read the response, so use a timeout approach
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Critical for Google Apps Script
-                    headers: {
-                        'Content-Type': 'text/plain', // Google Apps Script prefers text/plain for no-cors
-                    },
-                    body: JSON.stringify(data),
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                // Can't read response with no-cors, assume success
-                lastSyncTime = new Date();
-                localStorage.setItem('lastSyncTime', lastSyncTime.toISOString());
-                updateSyncInfo();
-
-                return { success: true };
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    throw new Error('Request timeout');
-                }
-                throw error;
-            }
-        }
-
-        function addEntryToLocal(entry) {
-            // Add to today's entries
-            todaysEntries.unshift(entry);
-
-            // Update daily totals
-            dailyTotals.calories += entry.calories;
-            dailyTotals.protein += entry.protein;
-            dailyTotals.carbs += entry.carbs;
-            dailyTotals.fat += entry.fat;
-
-            // Save to localStorage
-            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
-            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
-            localStorage.setItem('lastEntryDate', new Date().toDateString());
-        }
-
-        function addToUnsyncedQueue(entry) {
-            unsyncedQueue.push(entry);
-            localStorage.setItem('unsyncedQueue', JSON.stringify(unsyncedQueue));
-            updateUnsyncedBadge();
-        }
-
-        function loadUnsyncedQueue() {
-            const saved = localStorage.getItem('unsyncedQueue');
-            if (saved) {
-                unsyncedQueue = JSON.parse(saved);
-                updateUnsyncedBadge();
-            }
-        }
-
-        async function processUnsyncedQueue() {
-            if (unsyncedQueue.length === 0 || !isOnline || !apiConnected) {
-                return;
-            }
-
-            const queue = [...unsyncedQueue];
-            const failed = [];
-
-            for (const entry of queue) {
-                try {
-                    await submitToServer(entry);
-                    // Remove from queue if successful
-                    unsyncedQueue = unsyncedQueue.filter(e => e.id !== entry.id);
-                } catch (error) {
-                    failed.push(entry);
-                }
-            }
-
-            // Update queue with only failed items
-            unsyncedQueue = failed;
-            localStorage.setItem('unsyncedQueue', JSON.stringify(unsyncedQueue));
-            updateUnsyncedBadge();
-
-            if (failed.length === 0 && queue.length > 0) {
-                showToast('success', 'Sync Complete', `${queue.length} entries synced`);
-            }
-        }
-
-        function checkIfIOS() {
-            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        }
-
-        async function triggerAppleHealthIntegration(data) {
-            if (!checkIfIOS()) {
-                return false;
-            }
-
-            try {
-                // Method 1: Try iframe (won't navigate away)
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = `shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(JSON.stringify({
-                    calories: data.calories,
-                    protein: data.protein,
-                    carbs: data.carbs,
-                    fat: data.fat,
-                    mealType: data.mealType
-                }))}`;
-
-                document.body.appendChild(iframe);
-
-                // Remove iframe after a delay
-                setTimeout(() => {
-                    document.body.removeChild(iframe);
-                }, 2000);
-
-                return true;
-            } catch (error) {
-                console.error('Apple Health integration failed:', error);
-                return false;
-            }
-        }
-
-        function manualAppleHealth() {
-            if (!currentFormData) {
-                showToast('error', 'No Data', 'Please submit an entry first');
-                return;
-            }
-
-            const url = `shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(JSON.stringify({
-                calories: currentFormData.calories,
-                protein: currentFormData.protein,
-                carbs: currentFormData.carbs,
-                fat: currentFormData.fat,
-                mealType: currentFormData.mealType
-            }))}`;
-
-            // Create a temporary link
-            const link = document.createElement('a');
-            link.href = url;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            showToast('info', 'Opening Shortcuts', 'Check if the Shortcuts app opened');
-
-            // Hide the button after use
-            appleHealthBtn.classList.remove('show');
-        }
-
-        function showToast(type, title, message, duration = 3000, action = null) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-
-            const iconMap = {
-                'success': '✓',
-                'error': '✗',
-                'warning': '⚠',
-                'info': 'ℹ'
-            };
-
-            toast.innerHTML = `
-                <span class="toast-icon">${iconMap[type] || 'ℹ'}</span>
-                <div class="toast-content">
-                    <div class="toast-title">${title}</div>
-                    <div class="toast-message">${message}</div>
-                </div>
-                ${action ? `<button class="toast-action" onclick="${action}">Retry</button>` : ''}
-            `;
-
-            toastContainer.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => {
-                    toastContainer.removeChild(toast);
-                }, 300);
-            }, duration);
-        }
-
-        function showFavoriteModal() {
-            favoriteModal.classList.add('active');
-            document.getElementById('favoriteName').value = currentFormData.description || '';
-            document.getElementById('favoriteName').focus();
-        }
-
-        function closeFavoriteModal() {
-            favoriteModal.classList.remove('active');
-        }
-
-        function saveFavorite() {
-            const name = document.getElementById('favoriteName').value.trim();
-
-            if (!name) {
-                showToast('error', 'Name Required', 'Please enter a name for this favorite');
-                return;
-            }
-
-            if (!currentFormData) {
-                return;
-            }
-
-            const favoriteKey = name.toLowerCase().replace(/\s+/g, '-');
-
-            FAVORITE_MEALS[favoriteKey] = {
-                name: name,
-                calories: currentFormData.calories,
-                protein: currentFormData.protein,
-                carbs: currentFormData.carbs,
-                fat: currentFormData.fat,
-                mealType: currentFormData.mealType,
-                description: currentFormData.description
-            };
-
-            localStorage.setItem('favoriteMeals', JSON.stringify(FAVORITE_MEALS));
-            displayFavorites();
-            closeFavoriteModal();
-            showToast('success', 'Favorite Saved', `"${name}" added to favorites`);
-        }
-
-        function loadFavorites() {
-            const savedFavorites = localStorage.getItem('favoriteMeals');
-            if (savedFavorites) {
-                FAVORITE_MEALS = JSON.parse(savedFavorites);
-                displayFavorites();
-            }
-        }
-
-        function displayFavorites() {
-            const favoritesGrid = document.getElementById('favoritesGrid');
-            favoritesGrid.innerHTML = '';
-
-            if (Object.keys(FAVORITE_MEALS).length === 0) {
-                favoritesGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #a0a0a0; padding: 20px;">No favorites yet. Add entries to save them as favorites!</p>';
-                return;
-            }
-
-            Object.entries(FAVORITE_MEALS).forEach(([key, meal]) => {
-                const btn = document.createElement('button');
-                btn.className = 'favorite-btn';
-                btn.dataset.favorite = key;
-                btn.innerHTML = `
-                    ${meal.name || meal.description || 'Favorite'}
-                    <button class="delete-favorite" data-favorite="${key}" onclick="event.stopPropagation();">×</button>
-                `;
-                favoritesGrid.appendChild(btn);
-            });
-        }
-
-        function deleteFavorite(key) {
-            delete FAVORITE_MEALS[key];
-            localStorage.setItem('favoriteMeals', JSON.stringify(FAVORITE_MEALS));
-            displayFavorites();
-            showToast('info', 'Removed', 'Favorite deleted');
-        }
-
-        function loadFavoriteMeal(favoriteKey) {
-            const meal = FAVORITE_MEALS[favoriteKey];
-            if (meal) {
-                document.getElementById('calories').value = meal.calories;
-                document.getElementById('protein').value = meal.protein;
-                document.getElementById('carbs').value = meal.carbs;
-                document.getElementById('fat').value = meal.fat;
-                document.getElementById('description').value = meal.description || '';
-                document.getElementById('mealType').value = meal.mealType || 'Snack';
-
-                // Animate button press
-                event.target.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    event.target.style.transform = 'scale(1)';
-                }, 150);
-            }
-        }
-
-        function loadTodaysData() {
-            const lastDate = localStorage.getItem('lastEntryDate');
-            const today = new Date().toDateString();
-
-            if (lastDate === today) {
-                // Load existing data
-                const savedEntries = localStorage.getItem('todaysEntries');
-                const savedTotals = localStorage.getItem('dailyTotals');
-
-                if (savedEntries) {
-                    todaysEntries = JSON.parse(savedEntries);
-                }
-
-                if (savedTotals) {
-                    dailyTotals = JSON.parse(savedTotals);
-                }
-            } else {
-                // Reset for new day
-                todaysEntries = [];
-                dailyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
-                localStorage.removeItem('todaysEntries');
-                localStorage.removeItem('dailyTotals');
-            }
-
-            updateTotalsDisplay();
-            updateHistoryDisplay();
-        }
-
-        function updateTotalsDisplay() {
-            // Update totals with animation
-            animateValue('totalCalories', Math.round(dailyTotals.calories));
-            animateValue('totalProtein', Math.round(dailyTotals.protein) + 'g');
-            animateValue('totalCarbs', Math.round(dailyTotals.carbs) + 'g');
-            animateValue('totalFat', Math.round(dailyTotals.fat) + 'g');
-
-            // Update progress bars
-            updateProgressBar('caloriesProgress', dailyTotals.calories, DAILY_GOALS.calories);
-            updateProgressBar('proteinProgress', dailyTotals.protein, DAILY_GOALS.protein);
-            updateProgressBar('carbsProgress', dailyTotals.carbs, DAILY_GOALS.carbs);
-            updateProgressBar('fatProgress', dailyTotals.fat, DAILY_GOALS.fat);
-        }
-
-        function animateValue(elementId, newValue) {
-            const element = document.getElementById(elementId);
-            element.textContent = newValue;
-
-            // Trigger animation
-            element.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-                element.style.transform = 'scale(1)';
-            }, 200);
-        }
-
-        function updateProgressBar(elementId, current, goal) {
-            const percentage = Math.min((current / goal) * 100, 100);
-            const progressBar = document.getElementById(elementId);
-            progressBar.style.width = percentage + '%';
-        }
-
-        function updateHistoryDisplay() {
-            historyContainer.innerHTML = '';
-
-            if (todaysEntries.length === 0) {
-                historyContainer.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 20px;">No entries today</p>';
-                return;
-            }
-
-            // Show last 5 entries
-            const entriesToShow = todaysEntries.slice(0, 5);
-
-            entriesToShow.forEach((entry, index) => {
-                const historyItem = createHistoryItem(entry, index);
-                historyContainer.appendChild(historyItem);
-            });
-        }
-
-        function createHistoryItem(entry, index) {
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.innerHTML = `
-                <div class="history-header">
-                    <div>
-                        <strong>${entry.mealType}</strong>
-                        ${entry.description ? `<div style="font-size: 12px; color: #a0a0a0; margin-top: 2px;">${entry.description}</div>` : ''}
-                    </div>
-                    <div>
-                        <span class="history-time">${formatTime(entry.timestamp)}</span>
-                    </div>
-                </div>
-                <div class="history-details">
-                    <div class="history-macro">
-                        <div class="history-macro-value">${Math.round(entry.calories)}</div>
-                        <div class="history-macro-label">Cal</div>
-                    </div>
-                    <div class="history-macro">
-                        <div class="history-macro-value">${Math.round(entry.protein)}g</div>
-                        <div class="history-macro-label">Protein</div>
-                    </div>
-                    <div class="history-macro">
-                        <div class="history-macro-value">${Math.round(entry.carbs)}g</div>
-                        <div class="history-macro-label">Carbs</div>
-                    </div>
-                    <div class="history-macro">
-                        <div class="history-macro-value">${Math.round(entry.fat)}g</div>
-                        <div class="history-macro-label">Fat</div>
-                    </div>
-                </div>
-                <div class="history-delete" onclick="deleteEntry(${index})">Delete</div>
-            `;
-
-            return div;
-        }
-
-        function deleteEntry(index) {
-            const entry = todaysEntries[index];
-
-            // Update totals
-            dailyTotals.calories -= entry.calories;
-            dailyTotals.protein -= entry.protein;
-            dailyTotals.carbs -= entry.carbs;
-            dailyTotals.fat -= entry.fat;
-
-            // Remove from array
-            todaysEntries.splice(index, 1);
-
-            // Update localStorage
-            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
-            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
-
-            // Update displays
-            updateTotalsDisplay();
-            updateHistoryDisplay();
-
-            showToast('info', 'Deleted', 'Entry removed');
-
-            // Haptic feedback
-            if (navigator.vibrate) {
-                navigator.vibrate(100);
-            }
-        }
-
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
-        }
-
-        function clearForm() {
-            form.reset();
-            currentFormData = null;
-        }
-
-        function updateDateDisplay() {
-            const now = new Date();
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            };
-            dateDisplay.textContent = now.toLocaleDateString('en-US', options);
-        }
-
-        // Debug functions
-        function toggleDebugMode() {
-            debugMode = !debugMode;
-            if (debugMode) {
-                showDebugPanel();
-            } else {
-                hideDebugPanel();
-            }
-        }
-
-        function showDebugPanel() {
-            const debugInfo = document.getElementById('debugInfo');
-            debugInfo.innerHTML = `
-                <div>API URL: ${API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' ? 'Not configured' : 'Configured'}</div>
-                <div>Online: ${isOnline}</div>
-                <div>API Connected: ${apiConnected}</div>
-                <div>Today's Entries: ${todaysEntries.length}</div>
-                <div>Unsynced Queue: ${unsyncedQueue.length}</div>
-                <div>Last Sync: ${lastSyncTime ? lastSyncTime.toLocaleString() : 'Never'}</div>
-                <div>Favorites: ${Object.keys(FAVORITE_MEALS).length}</div>
-                <div>Platform: ${navigator.platform}</div>
-                <div>iOS: ${checkIfIOS()}</div>
-                <div>PWA: ${window.navigator.standalone ? 'Yes' : 'No'}</div>
-            `;
-            debugPanel.classList.add('active');
-        }
-
-        function hideDebugPanel() {
-            debugPanel.classList.remove('active');
-        }
-
-        function closeDebug() {
-            debugMode = false;
-            hideDebugPanel();
+        // Test panel functions
+        function toggleTestPanel() {
+            testPanel.classList.toggle('show');
         }
 
         async function testAPIConnection() {
-            showToast('info', 'Testing', 'Checking API connection...');
+            showToast('info', 'Testing...', 'Checking Google Sheets connection');
             await checkAPIConnection();
         }
 
-        function clearAllData() {
-            if (confirm('Clear all data? This cannot be undone.')) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        async function syncNow() {
-            showToast('info', 'Syncing', 'Checking for updates...');
+        async function forceSync() {
+            showToast('info', 'Syncing...', 'Uploading unsynced entries');
             await checkAPIConnection();
             await processUnsyncedQueue();
             updateSyncInfo();
         }
 
-        // Service Worker registration for offline functionality
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:text/javascript,console.log("SW registered")');
+        function clearAllData() {
+            if (confirm('Delete all data? This cannot be undone!')) {
+                localStorage.clear();
+                location.reload();
+            }
         }
-
-        // Add to home screen prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
     </script>
 </body>
 </html>
