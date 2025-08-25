@@ -318,29 +318,81 @@
             100% { transform: translate(-50%, -50%) scale(1); }
         }
 
-        .apple-health-btn {
-            width: 100%;
-            min-height: 48px;
+        .favorite-indicator {
             background: rgba(102, 126, 234, 0.1);
             border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 12px;
-            color: #667eea;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            border-radius: 8px;
+            padding: 8px 12px;
             margin-bottom: 15px;
+            font-size: 12px;
+            color: #667eea;
+            text-align: center;
             display: none;
         }
 
-        .apple-health-btn.show {
+        .favorite-indicator.show {
             display: block;
             animation: slideIn 0.3s ease;
         }
 
+        .apple-health-options {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .apple-health-options.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .apple-health-btn {
+            width: 100%;
+            min-height: 44px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+
+        .apple-health-btn.primary {
+            background: rgba(102, 126, 234, 0.15);
+        }
+
+        .apple-health-btn.secondary {
+            background: rgba(102, 126, 234, 0.08);
+        }
+
         .apple-health-btn:active {
-            background: rgba(102, 126, 234, 0.2);
+            background: rgba(102, 126, 234, 0.25);
             transform: scale(0.98);
+        }
+
+        .health-instructions {
+            font-size: 11px;
+            color: #a0a0a0;
+            text-align: center;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .debug-data {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 10px;
+            color: #fbbf24;
+            display: none;
         }
 
         .undo-btn {
@@ -757,6 +809,9 @@
         <div class="form-section">
             <h2 class="section-title">Add Entry</h2>
             <div class="card">
+                <!-- Favorite Indicator -->
+                <div class="favorite-indicator" id="favoriteIndicator"></div>
+
                 <form id="nutritionForm">
                     <div class="form-row">
                         <div class="form-group">
@@ -823,10 +878,28 @@
 
                     <button type="submit" class="submit-btn" id="submitBtn">Log Entry</button>
                     
-                    <!-- Apple Health Button (iOS only) -->
-                    <button type="button" class="apple-health-btn" id="appleHealthBtn" onclick="logToAppleHealth()">
-                        📱 Log to Apple Health
-                    </button>
+                    <!-- Apple Health Options (iOS only) -->
+                    <div class="apple-health-options" id="appleHealthOptions">
+                        <p class="health-instructions">Choose method to log to Apple Health:</p>
+                        
+                        <button type="button" class="apple-health-btn primary" onclick="logToAppleHealthSimple()">
+                            📱 Direct Log to Health
+                        </button>
+                        
+                        <button type="button" class="apple-health-btn secondary" onclick="copyForAppleHealth()">
+                            📋 Copy & Open Shortcuts
+                        </button>
+                        
+                        <p style="font-size: 11px; color: #666; margin-top: 8px; text-align: center; line-height: 1.3;">
+                            If direct log doesn't work, use copy method and paste when Shortcuts asks for input
+                        </p>
+                        
+                        <div class="debug-data" id="debugData"></div>
+                        
+                        <button type="button" style="background: none; border: none; color: #666; font-size: 10px; width: 100%; margin-top: 5px;" onclick="showAppleHealthDebug()">
+                            Show Debug Info
+                        </button>
+                    </div>
 
                     <!-- Undo Button -->
                     <button type="button" class="undo-btn" id="undoBtn" onclick="undoLastEntry()">
@@ -886,13 +959,16 @@
         let lastEntry = null;
         let toastCount = 0;
         let inputDebounceTimer = null;
+        let currentlyLoadedFavorite = null;
+        let favoriteIndicatorTimeout = null;
 
         // DOM elements
         const form = document.getElementById('nutritionForm');
         const submitBtn = document.getElementById('submitBtn');
         const historyContainer = document.getElementById('historyContainer');
         const dateDisplay = document.getElementById('dateDisplay');
-        const appleHealthBtn = document.getElementById('appleHealthBtn');
+        const appleHealthOptions = document.getElementById('appleHealthOptions');
+        const favoriteIndicator = document.getElementById('favoriteIndicator');
         const undoBtn = document.getElementById('undoBtn');
         const addFavoriteBtn = document.getElementById('addFavoriteBtn');
         const testPanel = document.getElementById('testPanel');
@@ -953,6 +1029,11 @@
                 $(field).addEventListener('input', debounce(() => {
                     updateMacroCalculation();
                     triggerHaptic();
+                    
+                    // Clear favorite indicator if user manually changes values
+                    if (currentlyLoadedFavorite) {
+                        hideFavoriteIndicator();
+                    }
                 }, 300));
             });
 
@@ -1094,12 +1175,12 @@
         }
 
         function showPostSubmitButtons(formData) {
-            // Show Apple Health button on iOS
+            // Show Apple Health options on iOS
             if (isIOS()) {
-                appleHealthBtn.classList.add('show');
+                appleHealthOptions.classList.add('show');
                 setTimeout(() => {
-                    appleHealthBtn.classList.remove('show');
-                }, 8000);
+                    appleHealthOptions.classList.remove('show');
+                }, 12000);
             }
 
             // Show undo button
@@ -1108,12 +1189,21 @@
                 undoBtn.classList.remove('show');
             }, 5000);
 
-            // Show add to favorites if has description
-            if (formData.description && formData.description.trim() && favoritesArray.length < MAX_FAVORITES) {
+            // Show add to favorites if has description and not from favorite
+            if (formData.description && formData.description.trim() && 
+                favoritesArray.length < MAX_FAVORITES && 
+                formData.source === 'Manual') {
                 addFavoriteBtn.classList.add('show');
                 setTimeout(() => {
                     addFavoriteBtn.classList.remove('show');
                 }, 8000);
+            }
+
+            // Clear favorite indicator after submission
+            if (currentlyLoadedFavorite) {
+                setTimeout(() => {
+                    hideFavoriteIndicator();
+                }, 2000);
             }
         }
 
@@ -1152,7 +1242,7 @@
         }
 
         function getFormData() {
-            return {
+            const data = {
                 calories: parseFloat($('calories').value) || 0,
                 protein: parseFloat($('protein').value) || 0,
                 carbs: parseFloat($('carbs').value) || 0,
@@ -1163,6 +1253,17 @@
                 date: new Date().toDateString(),
                 id: Date.now().toString()
             };
+
+            // Add source tracking for Google Sheets
+            if (currentlyLoadedFavorite) {
+                data.source = 'Favorite';
+                data.favoriteName = currentlyLoadedFavorite.name;
+            } else {
+                data.source = 'Manual';
+                data.favoriteName = '';
+            }
+
+            return data;
         }
 
         async function submitToServer(data) {
@@ -1251,31 +1352,102 @@
             updateMacroCalculation();
         }
 
-        function logToAppleHealth() {
+        // APPLE HEALTH INTEGRATION - FIXED METHODS
+        function logToAppleHealthSimple() {
             if (!lastEntry && !getCurrentFormData()) {
                 showToast('error', 'No Data', 'Please submit an entry first');
                 return;
             }
 
             const data = lastEntry || getCurrentFormData();
-            const url = `shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(JSON.stringify({
-                calories: data.calories,
-                protein: data.protein,
-                carbs: data.carbs,
-                fat: data.fat,
-                mealType: data.mealType
-            }))}`;
-
-            // Direct navigation - works best in Safari
+            
+            // Method 1: Simple comma-separated values (recommended)
+            const simpleData = `${data.calories},${data.protein},${data.carbs},${data.fat}`;
+            
+            // Try with x-callback-url format
+            const url = `shortcuts://x-callback-url/run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(simpleData)}`;
+            
             window.location.href = url;
             
-            // Hide button after use
-            appleHealthBtn.classList.remove('show');
-            
-            // Show feedback after delay
+            // Show instructions
             setTimeout(() => {
-                showToast('info', 'Opening Shortcuts', 'Check if Apple Health logged the entry');
-            }, 1000);
+                showToast('info', 'Check Apple Health', 'If data didn\'t log, try the Copy method instead');
+            }, 2000);
+        }
+
+        function copyForAppleHealth() {
+            if (!lastEntry && !getCurrentFormData()) {
+                showToast('error', 'No Data', 'Please submit an entry first');
+                return;
+            }
+
+            const data = lastEntry || getCurrentFormData();
+            
+            // Format as simple CSV that the shortcut can parse
+            const csvData = `${data.calories},${data.protein},${data.carbs},${data.fat}`;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(csvData).then(() => {
+                    showToast('success', 'Copied!', 'Open Shortcuts app → Run "Log Nutrition" → Paste the data');
+                    
+                    // Try to open Shortcuts app
+                    setTimeout(() => {
+                        window.location.href = 'shortcuts://';
+                    }, 1000);
+                }).catch(() => {
+                    fallbackCopy(csvData);
+                });
+            } else {
+                fallbackCopy(csvData);
+            }
+        }
+
+        function fallbackCopy(text) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('success', 'Copied!', 'Open Shortcuts and paste: ' + text);
+            } catch (err) {
+                showToast('error', 'Copy Failed', 'Manually copy: ' + text);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showAppleHealthDebug() {
+            const data = lastEntry || getCurrentFormData();
+            if (!data) {
+                showToast('error', 'No Data', 'Submit an entry first');
+                return;
+            }
+
+            const debugData = $('debugData');
+            const formats = {
+                'CSV (Recommended)': `${data.calories},${data.protein},${data.carbs},${data.fat}`,
+                'JSON': JSON.stringify({calories: data.calories, protein: data.protein, carbs: data.carbs, fat: data.fat}),
+                'URL Encoded': encodeURIComponent(`${data.calories},${data.protein},${data.carbs},${data.fat}`)
+            };
+
+            debugData.innerHTML = `
+                <strong>Debug Data Formats:</strong><br>
+                <strong>CSV:</strong> ${formats['CSV (Recommended)']}<br>
+                <strong>JSON:</strong> ${formats['JSON']}<br>
+                <strong>Encoded:</strong> ${formats['URL Encoded']}
+            `;
+            
+            debugData.style.display = 'block';
+            
+            // Hide after 10 seconds
+            setTimeout(() => {
+                debugData.style.display = 'none';
+            }, 10000);
         }
 
         function getCurrentFormData() {
@@ -1392,6 +1564,7 @@
         function loadFavorite(favoriteId) {
             const favorite = favoritesArray.find(f => f.id === favoriteId);
             if (favorite) {
+                // Load the favorite data into form
                 $('calories').value = favorite.calories;
                 $('protein').value = favorite.protein;
                 $('carbs').value = favorite.carbs;
@@ -1399,6 +1572,39 @@
                 $('mealType').value = favorite.mealType;
                 $('description').value = favorite.description || '';
                 updateMacroCalculation();
+                
+                // Set currently loaded favorite for tracking
+                currentlyLoadedFavorite = favorite;
+                
+                // Show favorite indicator
+                showFavoriteIndicator(favorite.name);
+                
+                showToast('success', 'Favorite Loaded', `"${favorite.name}" loaded into form`);
+            }
+        }
+
+        function showFavoriteIndicator(favoriteName) {
+            favoriteIndicator.innerHTML = `⭐ Loaded: "${favoriteName}"`;
+            favoriteIndicator.classList.add('show');
+            
+            // Clear existing timeout
+            if (favoriteIndicatorTimeout) {
+                clearTimeout(favoriteIndicatorTimeout);
+            }
+            
+            // Auto-hide after 10 seconds if not submitted
+            favoriteIndicatorTimeout = setTimeout(() => {
+                hideFavoriteIndicator();
+            }, 10000);
+        }
+
+        function hideFavoriteIndicator() {
+            favoriteIndicator.classList.remove('show');
+            currentlyLoadedFavorite = null;
+            
+            if (favoriteIndicatorTimeout) {
+                clearTimeout(favoriteIndicatorTimeout);
+                favoriteIndicatorTimeout = null;
             }
         }
 
@@ -1668,6 +1874,7 @@
                         <div>
                             <strong>${entry.mealType}</strong>
                             ${entry.description ? `<div style="font-size: 11px; color: #a0a0a0; margin-top: 2px;">${entry.description}</div>` : ''}
+                            ${entry.source === 'Favorite' ? `<div style="font-size: 10px; color: #667eea; margin-top: 1px;">⭐ ${entry.favoriteName}</div>` : ''}
                         </div>
                         <span class="history-time">${formatTime(entry.timestamp)}</span>
                     </div>
@@ -1725,6 +1932,11 @@
         function clearForm() {
             form.reset();
             $('macroCalc').style.display = 'none';
+            
+            // Clear favorite tracking when form is manually cleared
+            if (currentlyLoadedFavorite) {
+                hideFavoriteIndicator();
+            }
         }
 
         function updateDateDisplay() {
