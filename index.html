@@ -39,9 +39,70 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #fbbf24;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+        }
+
+        .status-dot.error {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .sync-info {
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+
+        .unsynced-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
+            margin-top: 50px;
         }
 
         .app-title {
@@ -52,6 +113,8 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
         }
 
         .date-display {
@@ -144,11 +207,31 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
 
         .favorite-btn:active {
             transform: scale(0.98);
             background: #3a3a3a;
+        }
+
+        .delete-favorite {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .favorite-btn:hover .delete-favorite {
+            display: block;
         }
 
         .form-section {
@@ -211,7 +294,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             position: relative;
             overflow: hidden;
         }
@@ -225,14 +308,52 @@
             cursor: not-allowed;
         }
 
-        .loading {
+        /* Multi-step Progress */
+        .submission-progress {
             display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .submission-progress.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            opacity: 1;
+        }
+
+        .progress-step.completed {
+            opacity: 1;
+        }
+
+        .progress-step.error {
+            color: #ef4444;
+        }
+
+        .step-icon {
             width: 24px;
             height: 24px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-spinner {
+            width: 20px;
+            height: 20px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top: 2px solid #ffffff;
             border-radius: 50%;
@@ -240,8 +361,189 @@
         }
 
         @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .step-checkmark {
+            color: #10b981;
+            font-size: 20px;
+        }
+
+        .step-error {
+            color: #ef4444;
+            font-size: 20px;
+        }
+
+        .step-text {
+            flex: 1;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #2a2a2a;
+            color: #ffffff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+            animation: slideInRight 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 350px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast.warning {
+            border-left: 4px solid #fbbf24;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .toast-message {
+            font-size: 14px;
+            color: #a0a0a0;
+        }
+
+        .toast-action {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Save as Favorite Modal */
+        .favorite-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .favorite-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 350px;
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .modal-input {
+            width: 100%;
+            min-height: 48px;
+            background: #2a2a2a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0 16px;
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            min-height: 44px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+        }
+
+        .modal-btn.secondary {
+            background: #2a2a2a;
+            color: #a0a0a0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .apple-health-btn {
+            width: 100%;
+            min-height: 48px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .apple-health-btn.show {
+            display: block;
         }
 
         .history-section {
@@ -256,6 +558,26 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             position: relative;
             transition: all 0.2s ease;
+            touch-action: pan-y;
+        }
+
+        .history-item.swipe-left {
+            transform: translateX(-80px);
+        }
+
+        .history-delete {
+            position: absolute;
+            right: -80px;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            background: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 12px 12px 0;
+            color: white;
+            font-weight: 600;
         }
 
         .history-header {
@@ -268,22 +590,6 @@
         .history-time {
             font-size: 12px;
             color: #a0a0a0;
-        }
-
-        .delete-btn {
-            background: #ef4444;
-            border: none;
-            border-radius: 6px;
-            color: #ffffff;
-            font-size: 12px;
-            padding: 4px 8px;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-
-        .delete-btn:active {
-            opacity: 1;
         }
 
         .history-details {
@@ -305,77 +611,6 @@
         .history-macro-label {
             color: #a0a0a0;
             margin-top: 2px;
-        }
-
-        .success-message {
-            background: #10b981;
-            color: #ffffff;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 500;
-            display: none;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .error-message {
-            color: #ef4444;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .offline-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ef4444;
-            color: #ffffff;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            display: none;
-            z-index: 1000;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: env(safe-area-inset-top, 10px) 15px env(safe-area-inset-bottom, 10px);
-            }
-
-            .app-title {
-                font-size: 28px;
-            }
-
-            .daily-totals {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-
-            .total-value {
-                font-size: 20px;
-            }
-        }
-
-        .pull-to-refresh {
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .nutrition-description {
-            grid-column: 1 / -1;
         }
 
         .quick-add-section {
@@ -401,15 +636,138 @@
         .quick-add-btn:active {
             background: rgba(102, 126, 234, 0.3);
         }
+
+        /* Debug Mode */
+        .debug-panel {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0a0a0a;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            max-height: 50vh;
+            overflow-y: auto;
+            z-index: 4000;
+        }
+
+        .debug-panel.active {
+            display: block;
+        }
+
+        .debug-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #fbbf24;
+        }
+
+        .debug-info {
+            font-family: monospace;
+            font-size: 12px;
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        .debug-btn {
+            background: #2a2a2a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .nutrition-description {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: env(safe-area-inset-top, 10px) 15px env(safe-area-inset-bottom, 10px);
+            }
+
+            .app-title {
+                font-size: 28px;
+            }
+
+            .daily-totals {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .total-value {
+                font-size: 20px;
+            }
+
+            .toast-container {
+                left: 10px;
+                right: 10px;
+            }
+
+            .toast {
+                max-width: 100%;
+            }
+        }
+
+        .pull-to-refresh {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body>
-    <div class="offline-indicator" id="offlineIndicator">Offline</div>
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="connection-status">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Checking...</span>
+            <span class="unsynced-badge" id="unsyncedBadge" style="display: none;">0</span>
+        </div>
+        <div class="sync-info" id="syncInfo">Never synced</div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Save as Favorite Modal -->
+    <div class="favorite-modal" id="favoriteModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Save as Favorite?</h3>
+            <input type="text" class="modal-input" id="favoriteName" placeholder="Enter a name for this meal">
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeFavoriteModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveFavorite()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div class="debug-panel" id="debugPanel">
+        <div class="debug-title">🔧 Debug Mode</div>
+        <div class="debug-info" id="debugInfo"></div>
+        <div>
+            <button class="debug-btn" onclick="testAPIConnection()">Test API</button>
+            <button class="debug-btn" onclick="clearAllData()">Clear All Data</button>
+            <button class="debug-btn" onclick="syncNow()">Force Sync</button>
+            <button class="debug-btn" onclick="closeDebug()">Close</button>
+        </div>
+    </div>
+
     <div class="pull-to-refresh" id="pullToRefresh">↓</div>
 
     <div class="container">
         <div class="header">
-            <h1 class="app-title">Nutrition Tracker</h1>
+            <h1 class="app-title" id="appTitle">Nutrition Tracker</h1>
             <div class="date-display" id="dateDisplay"></div>
         </div>
 
@@ -449,19 +807,51 @@
         <div class="form-section">
             <h2 class="section-title">Add Entry</h2>
             <div class="card">
-                <div class="success-message" id="successMessage">Entry added successfully!</div>
+                <!-- Multi-step Progress Display -->
+                <div class="submission-progress" id="submissionProgress">
+                    <div class="progress-step" id="step-validate">
+                        <div class="step-icon">
+                            <span class="step-spinner" style="display: none;"></span>
+                            <span class="step-checkmark" style="display: none;">✓</span>
+                            <span class="step-error" style="display: none;">✗</span>
+                        </div>
+                        <div class="step-text">Validating input...</div>
+                    </div>
+                    <div class="progress-step" id="step-local">
+                        <div class="step-icon">
+                            <span class="step-spinner" style="display: none;"></span>
+                            <span class="step-checkmark" style="display: none;">✓</span>
+                            <span class="step-error" style="display: none;">✗</span>
+                        </div>
+                        <div class="step-text">Saving locally...</div>
+                    </div>
+                    <div class="progress-step" id="step-cloud">
+                        <div class="step-icon">
+                            <span class="step-spinner" style="display: none;"></span>
+                            <span class="step-checkmark" style="display: none;">✓</span>
+                            <span class="step-error" style="display: none;">✗</span>
+                        </div>
+                        <div class="step-text">Syncing to cloud...</div>
+                    </div>
+                    <div class="progress-step" id="step-health">
+                        <div class="step-icon">
+                            <span class="step-spinner" style="display: none;"></span>
+                            <span class="step-checkmark" style="display: none;">✓</span>
+                            <span class="step-error" style="display: none;">✗</span>
+                        </div>
+                        <div class="step-text">Apple Health...</div>
+                    </div>
+                </div>
 
                 <form id="nutritionForm">
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="calories">Calories</label>
                             <input type="number" class="form-input" id="calories" name="calories" placeholder="0" min="0" max="9999" inputmode="numeric">
-                            <div class="error-message" id="caloriesError"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="protein">Protein (g)</label>
                             <input type="number" class="form-input" id="protein" name="protein" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
-                            <div class="error-message" id="proteinError"></div>
                         </div>
                     </div>
 
@@ -469,12 +859,10 @@
                         <div class="form-group">
                             <label class="form-label" for="carbs">Carbs (g)</label>
                             <input type="number" class="form-input" id="carbs" name="carbs" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
-                            <div class="error-message" id="carbsError"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="fat">Fat (g)</label>
                             <input type="number" class="form-input" id="fat" name="fat" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
-                            <div class="error-message" id="fatError"></div>
                         </div>
                     </div>
 
@@ -493,9 +881,11 @@
                         <input type="text" class="form-input" id="description" name="description" placeholder="e.g., Grilled chicken with vegetables">
                     </div>
 
-                    <button type="submit" class="submit-btn" id="submitBtn">
-                        <span id="submitText">Log Entry</span>
-                        <div class="loading" id="loading"></div>
+                    <button type="submit" class="submit-btn" id="submitBtn">Log Entry</button>
+
+                    <!-- Apple Health Button (shown on iOS) -->
+                    <button type="button" class="apple-health-btn" id="appleHealthBtn" onclick="manualAppleHealth()">
+                        🍎 Log to Apple Health
                     </button>
                 </form>
             </div>
@@ -504,7 +894,7 @@
         <div class="favorites-section">
             <h2 class="section-title">Favorites</h2>
             <div class="favorites-grid" id="favoritesGrid">
-                <!-- Favorites will be added dynamically as you use the app -->
+                <!-- Favorites will be added dynamically -->
             </div>
 
             <div class="quick-add-section">
@@ -525,16 +915,13 @@
         // IMPORTANT: Paste your Google Apps Script URL here
         const API_URL = 'https://script.google.com/macros/s/AKfycbzZCRtQwUBAT76gBkM5uPlbK4cIabcorNSKk6p1P2HzSr_3AWlegpLiAW_rRUhaL9MvPA/exec';
 
-        // Daily goals (can be customized)
+        // Configuration
         const DAILY_GOALS = {
             calories: 2000,
             protein: 150,
             carbs: 200,
             fat: 65
         };
-
-        // Favorite meals (will be populated from localStorage)
-        let FAVORITE_MEALS = {};
 
         // Global state
         let dailyTotals = {
@@ -545,17 +932,31 @@
         };
 
         let todaysEntries = [];
+        let unsyncedQueue = [];
+        let FAVORITE_MEALS = {};
         let isOnline = navigator.onLine;
+        let apiConnected = false;
+        let debugMode = false;
+        let debugTaps = 0;
+        let lastSyncTime = null;
+        let currentFormData = null;
+        let syncInterval = null;
 
         // DOM elements
         const form = document.getElementById('nutritionForm');
         const submitBtn = document.getElementById('submitBtn');
-        const submitText = document.getElementById('submitText');
-        const loading = document.getElementById('loading');
-        const successMessage = document.getElementById('successMessage');
         const historyContainer = document.getElementById('historyContainer');
         const dateDisplay = document.getElementById('dateDisplay');
-        const offlineIndicator = document.getElementById('offlineIndicator');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const unsyncedBadge = document.getElementById('unsyncedBadge');
+        const syncInfo = document.getElementById('syncInfo');
+        const submissionProgress = document.getElementById('submissionProgress');
+        const toastContainer = document.getElementById('toastContainer');
+        const favoriteModal = document.getElementById('favoriteModal');
+        const debugPanel = document.getElementById('debugPanel');
+        const appTitle = document.getElementById('appTitle');
+        const appleHealthBtn = document.getElementById('appleHealthBtn');
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -564,7 +965,10 @@
             updateDateDisplay();
             loadTodaysData();
             loadFavorites();
-            checkOnlineStatus();
+            loadUnsyncedQueue();
+            checkAPIConnection();
+            startAutoSync();
+            checkIfIOS();
         });
 
         function initializeApp() {
@@ -586,22 +990,33 @@
                     viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
                 });
             });
+
+            // Update sync info
+            const lastSync = localStorage.getItem('lastSyncTime');
+            if (lastSync) {
+                lastSyncTime = new Date(lastSync);
+                updateSyncInfo();
+            }
         }
 
         function setupEventListeners() {
             // Form submission
             form.addEventListener('submit', handleFormSubmit);
 
-            // Favorite buttons delegation (since they're dynamic now)
+            // Favorite buttons delegation
             document.getElementById('favoritesGrid').addEventListener('click', (e) => {
                 if (e.target.classList.contains('favorite-btn')) {
                     const favorite = e.target.dataset.favorite;
                     loadFavoriteMeal(favorite);
 
-                    // Haptic feedback (if supported)
+                    // Haptic feedback
                     if (navigator.vibrate) {
                         navigator.vibrate(50);
                     }
+                } else if (e.target.classList.contains('delete-favorite')) {
+                    e.stopPropagation();
+                    const favoriteKey = e.target.dataset.favorite;
+                    deleteFavorite(favoriteKey);
                 }
             });
 
@@ -619,15 +1034,32 @@
             // Online/offline detection
             window.addEventListener('online', () => {
                 isOnline = true;
-                offlineIndicator.style.display = 'none';
+                checkAPIConnection();
+                processUnsyncedQueue();
             });
 
             window.addEventListener('offline', () => {
                 isOnline = false;
-                offlineIndicator.style.display = 'block';
+                updateConnectionStatus('offline');
+            });
+
+            // Debug mode (triple tap title)
+            appTitle.addEventListener('click', () => {
+                debugTaps++;
+                if (debugTaps === 3) {
+                    toggleDebugMode();
+                }
+                setTimeout(() => { debugTaps = 0; }, 1000);
             });
 
             // Pull to refresh
+            setupPullToRefresh();
+
+            // Swipe to delete
+            setupSwipeToDelete();
+        }
+
+        function setupPullToRefresh() {
             let startY = 0;
             let pullDistance = 0;
             const container = document.querySelector('.container');
@@ -649,7 +1081,7 @@
 
             container.addEventListener('touchend', () => {
                 if (pullDistance > 60) {
-                    refreshData();
+                    syncNow();
                 }
                 pullToRefresh.style.top = '-50px';
                 pullToRefresh.style.opacity = '0';
@@ -657,15 +1089,551 @@
             });
         }
 
-        function updateDateDisplay() {
-            const now = new Date();
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+        function setupSwipeToDelete() {
+            let startX = 0;
+            let currentItem = null;
+
+            historyContainer.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.history-item')) {
+                    currentItem = e.target.closest('.history-item');
+                    startX = e.touches[0].clientX;
+                }
+            });
+
+            historyContainer.addEventListener('touchmove', (e) => {
+                if (currentItem) {
+                    const deltaX = e.touches[0].clientX - startX;
+                    if (deltaX < -50) {
+                        currentItem.style.transform = `translateX(${Math.max(deltaX, -80)}px)`;
+                    }
+                }
+            });
+
+            historyContainer.addEventListener('touchend', (e) => {
+                if (currentItem) {
+                    const deltaX = e.changedTouches[0].clientX - startX;
+                    if (deltaX < -50) {
+                        currentItem.classList.add('swipe-left');
+                        const deleteBtn = currentItem.querySelector('.history-delete');
+                        if (deleteBtn) {
+                            deleteBtn.style.display = 'flex';
+                        }
+                    } else {
+                        currentItem.style.transform = '';
+                    }
+                    currentItem = null;
+                }
+            });
+        }
+
+        async function checkAPIConnection() {
+            if (API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                updateConnectionStatus('not-configured');
+                return;
+            }
+
+            if (!isOnline) {
+                updateConnectionStatus('offline');
+                return;
+            }
+
+            try {
+                // Try to ping the API with a timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                await fetch(API_URL, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                // With no-cors, we can't read the response, so assume success
+                apiConnected = true;
+                updateConnectionStatus('connected');
+
+            } catch (error) {
+                apiConnected = false;
+                updateConnectionStatus('error');
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+
+            switch(status) {
+                case 'connected':
+                    dot.className = 'status-dot connected';
+                    text.textContent = 'Connected';
+                    break;
+                case 'offline':
+                    dot.className = 'status-dot error';
+                    text.textContent = 'Offline';
+                    break;
+                case 'not-configured':
+                    dot.className = 'status-dot';
+                    text.textContent = 'Not configured';
+                    showToast('warning', 'Setup Required', 'Please add your Google Apps Script URL', 5000);
+                    break;
+                case 'error':
+                    dot.className = 'status-dot error';
+                    text.textContent = 'Connection error';
+                    break;
+                default:
+                    dot.className = 'status-dot';
+                    text.textContent = 'Checking...';
+            }
+
+            updateUnsyncedBadge();
+        }
+
+        function updateUnsyncedBadge() {
+            const badge = document.getElementById('unsyncedBadge');
+            if (unsyncedQueue.length > 0) {
+                badge.textContent = unsyncedQueue.length;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function updateSyncInfo() {
+            const syncInfo = document.getElementById('syncInfo');
+            if (lastSyncTime) {
+                const diff = Date.now() - lastSyncTime.getTime();
+                const minutes = Math.floor(diff / 60000);
+
+                if (minutes < 1) {
+                    syncInfo.textContent = 'Just synced';
+                } else if (minutes < 60) {
+                    syncInfo.textContent = `Synced ${minutes}m ago`;
+                } else {
+                    const hours = Math.floor(minutes / 60);
+                    syncInfo.textContent = `Synced ${hours}h ago`;
+                }
+            } else {
+                syncInfo.textContent = 'Never synced';
+            }
+        }
+
+        function startAutoSync() {
+            // Auto sync every 30 seconds if there are unsynced items
+            syncInterval = setInterval(() => {
+                if (unsyncedQueue.length > 0 && isOnline) {
+                    processUnsyncedQueue();
+                }
+                updateSyncInfo();
+            }, 30000);
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            // Show progress
+            submissionProgress.classList.add('active');
+            submitBtn.disabled = true;
+
+            // Step 1: Validate
+            updateProgressStep('validate', 'active');
+
+            if (!validateForm()) {
+                updateProgressStep('validate', 'error', 'Validation failed');
+                setTimeout(() => {
+                    submissionProgress.classList.remove('active');
+                    submitBtn.disabled = false;
+                }, 2000);
+                return;
+            }
+
+            const formData = getFormData();
+            currentFormData = formData;
+
+            updateProgressStep('validate', 'completed');
+
+            // Step 2: Save locally
+            updateProgressStep('local', 'active');
+
+            try {
+                await delay(500); // Simulate processing
+                addEntryToLocal(formData);
+                updateProgressStep('local', 'completed');
+            } catch (error) {
+                updateProgressStep('local', 'error', 'Failed to save locally');
+                showToast('error', 'Save Failed', 'Could not save entry locally');
+                submitBtn.disabled = false;
+                return;
+            }
+
+            // Step 3: Sync to cloud
+            updateProgressStep('cloud', 'active');
+
+            if (isOnline && apiConnected) {
+                try {
+                    await submitToServer(formData);
+                    updateProgressStep('cloud', 'completed');
+                } catch (error) {
+                    updateProgressStep('cloud', 'error', 'Queued for sync');
+                    addToUnsyncedQueue(formData);
+                    showToast('warning', 'Saved Offline', 'Will sync when connection is restored');
+                }
+            } else {
+                updateProgressStep('cloud', 'error', 'Offline - will sync later');
+                addToUnsyncedQueue(formData);
+            }
+
+            // Step 4: Apple Health
+            if (checkIfIOS()) {
+                updateProgressStep('health', 'active');
+                const healthSuccess = await triggerAppleHealthIntegration(formData);
+                if (healthSuccess) {
+                    updateProgressStep('health', 'completed');
+                } else {
+                    updateProgressStep('health', 'error', 'Manual action needed');
+                    appleHealthBtn.classList.add('show');
+                }
+            } else {
+                // Hide health step if not iOS
+                document.getElementById('step-health').style.display = 'none';
+            }
+
+            // Success!
+            setTimeout(() => {
+                submissionProgress.classList.remove('active');
+                submitBtn.disabled = false;
+                clearForm();
+                updateTotalsDisplay();
+                updateHistoryDisplay();
+
+                // Ask to save as favorite
+                setTimeout(() => {
+                    if (formData.description && formData.description.trim() !== '') {
+                        showFavoriteModal();
+                    }
+                }, 500);
+
+                showToast('success', 'Entry Added!', 'Successfully logged your nutrition');
+
+                // Haptic feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 50, 50]);
+                }
+            }, 1000);
+        }
+
+        function updateProgressStep(stepId, status, customText = null) {
+            const step = document.getElementById(`step-${stepId}`);
+            const spinner = step.querySelector('.step-spinner');
+            const checkmark = step.querySelector('.step-checkmark');
+            const error = step.querySelector('.step-error');
+            const text = step.querySelector('.step-text');
+
+            // Reset all states
+            step.classList.remove('active', 'completed', 'error');
+            spinner.style.display = 'none';
+            checkmark.style.display = 'none';
+            error.style.display = 'none';
+
+            switch(status) {
+                case 'active':
+                    step.classList.add('active');
+                    spinner.style.display = 'block';
+                    break;
+                case 'completed':
+                    step.classList.add('completed');
+                    checkmark.style.display = 'block';
+                    break;
+                case 'error':
+                    step.classList.add('error');
+                    error.style.display = 'block';
+                    if (customText) {
+                        text.textContent = customText;
+                    }
+                    break;
+            }
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function validateForm() {
+            const calories = parseFloat(document.getElementById('calories').value) || 0;
+            const protein = parseFloat(document.getElementById('protein').value) || 0;
+            const carbs = parseFloat(document.getElementById('carbs').value) || 0;
+            const fat = parseFloat(document.getElementById('fat').value) || 0;
+
+            if (calories < 0 || calories > 9999) {
+                showToast('error', 'Invalid Input', 'Calories must be between 0 and 9999');
+                return false;
+            }
+
+            if (protein < 0 || protein > 999) {
+                showToast('error', 'Invalid Input', 'Protein must be between 0 and 999g');
+                return false;
+            }
+
+            if (carbs < 0 || carbs > 999) {
+                showToast('error', 'Invalid Input', 'Carbs must be between 0 and 999g');
+                return false;
+            }
+
+            if (fat < 0 || fat > 999) {
+                showToast('error', 'Invalid Input', 'Fat must be between 0 and 999g');
+                return false;
+            }
+
+            // At least one macro should be entered
+            if (calories === 0 && protein === 0 && carbs === 0 && fat === 0) {
+                showToast('error', 'Empty Entry', 'Please enter at least one value');
+                return false;
+            }
+
+            return true;
+        }
+
+        function getFormData() {
+            return {
+                calories: parseFloat(document.getElementById('calories').value) || 0,
+                protein: parseFloat(document.getElementById('protein').value) || 0,
+                carbs: parseFloat(document.getElementById('carbs').value) || 0,
+                fat: parseFloat(document.getElementById('fat').value) || 0,
+                mealType: document.getElementById('mealType').value,
+                description: document.getElementById('description').value.trim(),
+                timestamp: new Date().toISOString(),
+                date: new Date().toDateString(),
+                id: Date.now().toString()
             };
-            dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        async function submitToServer(data) {
+            if (API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                throw new Error('API not configured');
+            }
+
+            // Use no-cors mode for Google Apps Script
+            // We can't read the response, so use a timeout approach
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Critical for Google Apps Script
+                    headers: {
+                        'Content-Type': 'text/plain', // Google Apps Script prefers text/plain for no-cors
+                    },
+                    body: JSON.stringify(data),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                // Can't read response with no-cors, assume success
+                lastSyncTime = new Date();
+                localStorage.setItem('lastSyncTime', lastSyncTime.toISOString());
+                updateSyncInfo();
+
+                return { success: true };
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout');
+                }
+                throw error;
+            }
+        }
+
+        function addEntryToLocal(entry) {
+            // Add to today's entries
+            todaysEntries.unshift(entry);
+
+            // Update daily totals
+            dailyTotals.calories += entry.calories;
+            dailyTotals.protein += entry.protein;
+            dailyTotals.carbs += entry.carbs;
+            dailyTotals.fat += entry.fat;
+
+            // Save to localStorage
+            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
+            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
+            localStorage.setItem('lastEntryDate', new Date().toDateString());
+        }
+
+        function addToUnsyncedQueue(entry) {
+            unsyncedQueue.push(entry);
+            localStorage.setItem('unsyncedQueue', JSON.stringify(unsyncedQueue));
+            updateUnsyncedBadge();
+        }
+
+        function loadUnsyncedQueue() {
+            const saved = localStorage.getItem('unsyncedQueue');
+            if (saved) {
+                unsyncedQueue = JSON.parse(saved);
+                updateUnsyncedBadge();
+            }
+        }
+
+        async function processUnsyncedQueue() {
+            if (unsyncedQueue.length === 0 || !isOnline || !apiConnected) {
+                return;
+            }
+
+            const queue = [...unsyncedQueue];
+            const failed = [];
+
+            for (const entry of queue) {
+                try {
+                    await submitToServer(entry);
+                    // Remove from queue if successful
+                    unsyncedQueue = unsyncedQueue.filter(e => e.id !== entry.id);
+                } catch (error) {
+                    failed.push(entry);
+                }
+            }
+
+            // Update queue with only failed items
+            unsyncedQueue = failed;
+            localStorage.setItem('unsyncedQueue', JSON.stringify(unsyncedQueue));
+            updateUnsyncedBadge();
+
+            if (failed.length === 0 && queue.length > 0) {
+                showToast('success', 'Sync Complete', `${queue.length} entries synced`);
+            }
+        }
+
+        function checkIfIOS() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+
+        async function triggerAppleHealthIntegration(data) {
+            if (!checkIfIOS()) {
+                return false;
+            }
+
+            try {
+                // Method 1: Try iframe (won't navigate away)
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = `shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(JSON.stringify({
+                    calories: data.calories,
+                    protein: data.protein,
+                    carbs: data.carbs,
+                    fat: data.fat,
+                    mealType: data.mealType
+                }))}`;
+
+                document.body.appendChild(iframe);
+
+                // Remove iframe after a delay
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 2000);
+
+                return true;
+            } catch (error) {
+                console.error('Apple Health integration failed:', error);
+                return false;
+            }
+        }
+
+        function manualAppleHealth() {
+            if (!currentFormData) {
+                showToast('error', 'No Data', 'Please submit an entry first');
+                return;
+            }
+
+            const url = `shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(JSON.stringify({
+                calories: currentFormData.calories,
+                protein: currentFormData.protein,
+                carbs: currentFormData.carbs,
+                fat: currentFormData.fat,
+                mealType: currentFormData.mealType
+            }))}`;
+
+            // Create a temporary link
+            const link = document.createElement('a');
+            link.href = url;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('info', 'Opening Shortcuts', 'Check if the Shortcuts app opened');
+
+            // Hide the button after use
+            appleHealthBtn.classList.remove('show');
+        }
+
+        function showToast(type, title, message, duration = 3000, action = null) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const iconMap = {
+                'success': '✓',
+                'error': '✗',
+                'warning': '⚠',
+                'info': 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${iconMap[type] || 'ℹ'}</span>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                ${action ? `<button class="toast-action" onclick="${action}">Retry</button>` : ''}
+            `;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 300);
+            }, duration);
+        }
+
+        function showFavoriteModal() {
+            favoriteModal.classList.add('active');
+            document.getElementById('favoriteName').value = currentFormData.description || '';
+            document.getElementById('favoriteName').focus();
+        }
+
+        function closeFavoriteModal() {
+            favoriteModal.classList.remove('active');
+        }
+
+        function saveFavorite() {
+            const name = document.getElementById('favoriteName').value.trim();
+
+            if (!name) {
+                showToast('error', 'Name Required', 'Please enter a name for this favorite');
+                return;
+            }
+
+            if (!currentFormData) {
+                return;
+            }
+
+            const favoriteKey = name.toLowerCase().replace(/\s+/g, '-');
+
+            FAVORITE_MEALS[favoriteKey] = {
+                name: name,
+                calories: currentFormData.calories,
+                protein: currentFormData.protein,
+                carbs: currentFormData.carbs,
+                fat: currentFormData.fat,
+                mealType: currentFormData.mealType,
+                description: currentFormData.description
+            };
+
+            localStorage.setItem('favoriteMeals', JSON.stringify(FAVORITE_MEALS));
+            displayFavorites();
+            closeFavoriteModal();
+            showToast('success', 'Favorite Saved', `"${name}" added to favorites`);
         }
 
         function loadFavorites() {
@@ -689,9 +1657,19 @@
                 const btn = document.createElement('button');
                 btn.className = 'favorite-btn';
                 btn.dataset.favorite = key;
-                btn.textContent = meal.name || meal.description || 'Favorite';
+                btn.innerHTML = `
+                    ${meal.name || meal.description || 'Favorite'}
+                    <button class="delete-favorite" data-favorite="${key}" onclick="event.stopPropagation();">×</button>
+                `;
                 favoritesGrid.appendChild(btn);
             });
+        }
+
+        function deleteFavorite(key) {
+            delete FAVORITE_MEALS[key];
+            localStorage.setItem('favoriteMeals', JSON.stringify(FAVORITE_MEALS));
+            displayFavorites();
+            showToast('info', 'Removed', 'Favorite deleted');
         }
 
         function loadFavoriteMeal(favoriteKey) {
@@ -710,113 +1688,6 @@
                     event.target.style.transform = 'scale(1)';
                 }, 150);
             }
-        }
-
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-
-            if (!validateForm()) {
-                return;
-            }
-
-            const formData = getFormData();
-
-            // Show loading state
-            setLoadingState(true);
-
-            try {
-                // Add to local storage immediately
-                addEntryToLocal(formData);
-
-                // Try to sync with server if online
-                if (isOnline && API_URL !== 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                    await submitToServer(formData);
-                }
-
-                // Show success
-                showSuccess();
-                clearForm();
-                updateTotalsDisplay();
-                updateHistoryDisplay();
-
-                // Apple Health integration
-                if (window.navigator.userAgent.indexOf('iPhone') !== -1 ||
-                    window.navigator.userAgent.indexOf('iPad') !== -1) {
-                    triggerAppleHealthIntegration(formData);
-                }
-
-            } catch (error) {
-                console.error('Error submitting entry:', error);
-                showError('Failed to sync with server. Entry saved locally.');
-            } finally {
-                setLoadingState(false);
-            }
-        }
-
-        function validateForm() {
-            let isValid = true;
-            const fields = ['calories', 'protein', 'carbs', 'fat'];
-
-            fields.forEach(field => {
-                const input = document.getElementById(field);
-                const value = parseFloat(input.value);
-                const errorElement = document.getElementById(field + 'Error');
-
-                if (isNaN(value) || value < 0) {
-                    errorElement.textContent = 'Please enter a valid number';
-                    errorElement.style.display = 'block';
-                    isValid = false;
-                } else {
-                    errorElement.style.display = 'none';
-                }
-            });
-
-            return isValid;
-        }
-
-        function getFormData() {
-            return {
-                calories: parseFloat(document.getElementById('calories').value) || 0,
-                protein: parseFloat(document.getElementById('protein').value) || 0,
-                carbs: parseFloat(document.getElementById('carbs').value) || 0,
-                fat: parseFloat(document.getElementById('fat').value) || 0,
-                mealType: document.getElementById('mealType').value,
-                description: document.getElementById('description').value.trim(),
-                timestamp: new Date().toISOString(),
-                date: new Date().toDateString()
-            };
-        }
-
-        async function submitToServer(data) {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                throw new Error('Server error');
-            }
-
-            return response.json();
-        }
-
-        function addEntryToLocal(entry) {
-            // Add to today's entries
-            todaysEntries.unshift(entry);
-
-            // Update daily totals
-            dailyTotals.calories += entry.calories;
-            dailyTotals.protein += entry.protein;
-            dailyTotals.carbs += entry.carbs;
-            dailyTotals.fat += entry.fat;
-
-            // Save to localStorage
-            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
-            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
-            localStorage.setItem('lastEntryDate', new Date().toDateString());
         }
 
         function loadTodaysData() {
@@ -906,7 +1777,6 @@
                     </div>
                     <div>
                         <span class="history-time">${formatTime(entry.timestamp)}</span>
-                        <button class="delete-btn" onclick="deleteEntry(${index})">Delete</button>
                     </div>
                 </div>
                 <div class="history-details">
@@ -927,6 +1797,7 @@
                         <div class="history-macro-label">Fat</div>
                     </div>
                 </div>
+                <div class="history-delete" onclick="deleteEntry(${index})">Delete</div>
             `;
 
             return div;
@@ -952,6 +1823,8 @@
             updateTotalsDisplay();
             updateHistoryDisplay();
 
+            showToast('info', 'Deleted', 'Entry removed');
+
             // Haptic feedback
             if (navigator.vibrate) {
                 navigator.vibrate(100);
@@ -967,73 +1840,75 @@
             });
         }
 
-        function setLoadingState(loading) {
-            if (loading) {
-                submitBtn.disabled = true;
-                submitText.style.opacity = '0';
-                document.getElementById('loading').style.display = 'block';
-            } else {
-                submitBtn.disabled = false;
-                submitText.style.opacity = '1';
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
-
-        function showSuccess() {
-            successMessage.style.display = 'block';
-            setTimeout(() => {
-                successMessage.style.display = 'none';
-            }, 3000);
-        }
-
-        function showError(message) {
-            // You could create an error message element similar to successMessage
-            console.error(message);
-        }
-
         function clearForm() {
             form.reset();
-            document.querySelectorAll('.error-message').forEach(error => {
-                error.style.display = 'none';
-            });
+            currentFormData = null;
         }
 
-        function checkOnlineStatus() {
-            if (!isOnline) {
-                offlineIndicator.style.display = 'block';
+        function updateDateDisplay() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Debug functions
+        function toggleDebugMode() {
+            debugMode = !debugMode;
+            if (debugMode) {
+                showDebugPanel();
+            } else {
+                hideDebugPanel();
             }
         }
 
-        function refreshData() {
-            // Simulate refresh - in a real app, you might sync with server
-            loadTodaysData();
-
-            // Show refresh animation
-            const pullToRefresh = document.getElementById('pullToRefresh');
-            pullToRefresh.textContent = '✓';
-            setTimeout(() => {
-                pullToRefresh.textContent = '↓';
-            }, 1000);
+        function showDebugPanel() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML = `
+                <div>API URL: ${API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' ? 'Not configured' : 'Configured'}</div>
+                <div>Online: ${isOnline}</div>
+                <div>API Connected: ${apiConnected}</div>
+                <div>Today's Entries: ${todaysEntries.length}</div>
+                <div>Unsynced Queue: ${unsyncedQueue.length}</div>
+                <div>Last Sync: ${lastSyncTime ? lastSyncTime.toLocaleString() : 'Never'}</div>
+                <div>Favorites: ${Object.keys(FAVORITE_MEALS).length}</div>
+                <div>Platform: ${navigator.platform}</div>
+                <div>iOS: ${checkIfIOS()}</div>
+                <div>PWA: ${window.navigator.standalone ? 'Yes' : 'No'}</div>
+            `;
+            debugPanel.classList.add('active');
         }
 
-        function triggerAppleHealthIntegration(data) {
-            // Create Shortcuts URL for Apple Health
-            const shortcutURL = `shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(JSON.stringify({
-                calories: data.calories,
-                protein: data.protein,
-                carbs: data.carbs,
-                fat: data.fat,
-                mealType: data.mealType
-            }))}`;
+        function hideDebugPanel() {
+            debugPanel.classList.remove('active');
+        }
 
-            // Open the shortcut (will return to app automatically)
-            if (window.navigator.userAgent.indexOf('iPhone') !== -1 ||
-                window.navigator.userAgent.indexOf('iPad') !== -1) {
+        function closeDebug() {
+            debugMode = false;
+            hideDebugPanel();
+        }
 
-                setTimeout(() => {
-                    window.location.href = shortcutURL;
-                }, 500);
+        async function testAPIConnection() {
+            showToast('info', 'Testing', 'Checking API connection...');
+            await checkAPIConnection();
+        }
+
+        function clearAllData() {
+            if (confirm('Clear all data? This cannot be undone.')) {
+                localStorage.clear();
+                location.reload();
             }
+        }
+
+        async function syncNow() {
+            showToast('info', 'Syncing', 'Checking for updates...');
+            await checkAPIConnection();
+            await processUnsyncedQueue();
+            updateSyncInfo();
         }
 
         // Service Worker registration for offline functionality
@@ -1046,13 +1921,6 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-
-            // Show install button after a delay
-            setTimeout(() => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                }
-            }, 10000);
         });
     </script>
 </body>
