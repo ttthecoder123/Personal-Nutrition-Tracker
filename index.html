@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>Nutrition Tracker</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            touch-action: manipulation;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
+            min-height: 100vh;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .date-display {
+            font-size: 16px;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .daily-totals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .total-item {
+            text-align: center;
+        }
+
+        .total-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .total-label {
+            font-size: 12px;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #2a2a2a;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .favorites-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .favorite-btn {
+            background: #2a2a2a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 12px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .favorite-btn:active {
+            transform: scale(0.98);
+            background: #3a3a3a;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #a0a0a0;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            min-height: 48px;
+            background: #2a2a2a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0 16px;
+            color: #ffffff;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .meal-type-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a0a0a0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            min-height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 16px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .history-section {
+            margin-bottom: 30px;
+        }
+
+        .history-item {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            border: none;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 12px;
+            padding: 4px 8px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .delete-btn:active {
+            opacity: 1;
+        }
+
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .history-macro {
+            text-align: center;
+        }
+
+        .history-macro-value {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .history-macro-label {
+            color: #a0a0a0;
+            margin-top: 2px;
+        }
+
+        .success-message {
+            background: #10b981;
+            color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .offline-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ef4444;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: none;
+            z-index: 1000;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: env(safe-area-inset-top, 10px) 15px env(safe-area-inset-bottom, 10px);
+            }
+
+            .app-title {
+                font-size: 28px;
+            }
+
+            .daily-totals {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .total-value {
+                font-size: 20px;
+            }
+        }
+
+        .pull-to-refresh {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .nutrition-description {
+            grid-column: 1 / -1;
+        }
+
+        .quick-add-section {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .quick-add-btn {
+            flex: 1;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            color: #667eea;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 36px;
+        }
+
+        .quick-add-btn:active {
+            background: rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-indicator" id="offlineIndicator">Offline</div>
+    <div class="pull-to-refresh" id="pullToRefresh">↓</div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="app-title">Nutrition Tracker</h1>
+            <div class="date-display" id="dateDisplay"></div>
+        </div>
+
+        <div class="card">
+            <div class="daily-totals">
+                <div class="total-item">
+                    <div class="total-value" id="totalCalories">0</div>
+                    <div class="total-label">Calories</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="caloriesProgress"></div>
+                    </div>
+                </div>
+                <div class="total-item">
+                    <div class="total-value" id="totalProtein">0g</div>
+                    <div class="total-label">Protein</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="proteinProgress"></div>
+                    </div>
+                </div>
+                <div class="total-item">
+                    <div class="total-value" id="totalCarbs">0g</div>
+                    <div class="total-label">Carbs</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="carbsProgress"></div>
+                    </div>
+                </div>
+                <div class="total-item">
+                    <div class="total-value" id="totalFat">0g</div>
+                    <div class="total-label">Fat</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="fatProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="section-title">Add Entry</h2>
+            <div class="card">
+                <div class="success-message" id="successMessage">Entry added successfully!</div>
+
+                <form id="nutritionForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="calories">Calories</label>
+                            <input type="number" class="form-input" id="calories" name="calories" placeholder="0" min="0" max="9999" inputmode="numeric">
+                            <div class="error-message" id="caloriesError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="protein">Protein (g)</label>
+                            <input type="number" class="form-input" id="protein" name="protein" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
+                            <div class="error-message" id="proteinError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="carbs">Carbs (g)</label>
+                            <input type="number" class="form-input" id="carbs" name="carbs" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
+                            <div class="error-message" id="carbsError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="fat">Fat (g)</label>
+                            <input type="number" class="form-input" id="fat" name="fat" placeholder="0" min="0" max="999" step="0.1" inputmode="decimal">
+                            <div class="error-message" id="fatError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="mealType">Meal Type</label>
+                        <select class="form-input meal-type-select" id="mealType" name="mealType">
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Snack">Snack</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group nutrition-description">
+                        <label class="form-label" for="description">Description (Optional)</label>
+                        <input type="text" class="form-input" id="description" name="description" placeholder="e.g., Grilled chicken with vegetables">
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span id="submitText">Log Entry</span>
+                        <div class="loading" id="loading"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="favorites-section">
+            <h2 class="section-title">Favorites</h2>
+            <div class="favorites-grid" id="favoritesGrid">
+                <!-- Favorites will be added dynamically as you use the app -->
+            </div>
+
+            <div class="quick-add-section">
+                <button class="quick-add-btn" id="quickCal">+100 Cal</button>
+                <button class="quick-add-btn" id="quickProtein">+10g Protein</button>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2 class="section-title">Today's Entries</h2>
+            <div id="historyContainer">
+                <!-- Entries will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Paste your Google Apps Script URL here
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzZCRtQwUBAT76gBkM5uPlbK4cIabcorNSKk6p1P2HzSr_3AWlegpLiAW_rRUhaL9MvPA/exec';
+
+        // Daily goals (can be customized)
+        const DAILY_GOALS = {
+            calories: 2000,
+            protein: 150,
+            carbs: 200,
+            fat: 65
+        };
+
+        // Favorite meals (will be populated from localStorage)
+        let FAVORITE_MEALS = {};
+
+        // Global state
+        let dailyTotals = {
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0
+        };
+
+        let todaysEntries = [];
+        let isOnline = navigator.onLine;
+
+        // DOM elements
+        const form = document.getElementById('nutritionForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const loading = document.getElementById('loading');
+        const successMessage = document.getElementById('successMessage');
+        const historyContainer = document.getElementById('historyContainer');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const offlineIndicator = document.getElementById('offlineIndicator');
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            updateDateDisplay();
+            loadTodaysData();
+            loadFavorites();
+            checkOnlineStatus();
+        });
+
+        function initializeApp() {
+            // Set up viewport for iOS
+            if (window.navigator.standalone) {
+                document.body.classList.add('standalone');
+            }
+
+            // Prevent zoom on input focus (iOS)
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    const viewport = document.querySelector('meta[name="viewport"]');
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+                });
+
+                input.addEventListener('blur', () => {
+                    const viewport = document.querySelector('meta[name="viewport"]');
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            // Form submission
+            form.addEventListener('submit', handleFormSubmit);
+
+            // Favorite buttons delegation (since they're dynamic now)
+            document.getElementById('favoritesGrid').addEventListener('click', (e) => {
+                if (e.target.classList.contains('favorite-btn')) {
+                    const favorite = e.target.dataset.favorite;
+                    loadFavoriteMeal(favorite);
+
+                    // Haptic feedback (if supported)
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                }
+            });
+
+            // Quick add buttons
+            document.getElementById('quickCal').addEventListener('click', () => {
+                const currentCal = parseFloat(document.getElementById('calories').value) || 0;
+                document.getElementById('calories').value = currentCal + 100;
+            });
+
+            document.getElementById('quickProtein').addEventListener('click', () => {
+                const currentProtein = parseFloat(document.getElementById('protein').value) || 0;
+                document.getElementById('protein').value = currentProtein + 10;
+            });
+
+            // Online/offline detection
+            window.addEventListener('online', () => {
+                isOnline = true;
+                offlineIndicator.style.display = 'none';
+            });
+
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                offlineIndicator.style.display = 'block';
+            });
+
+            // Pull to refresh
+            let startY = 0;
+            let pullDistance = 0;
+            const container = document.querySelector('.container');
+            const pullToRefresh = document.getElementById('pullToRefresh');
+
+            container.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+            });
+
+            container.addEventListener('touchmove', (e) => {
+                if (window.scrollY === 0) {
+                    pullDistance = e.touches[0].clientY - startY;
+                    if (pullDistance > 0 && pullDistance < 100) {
+                        pullToRefresh.style.top = (pullDistance - 50) + 'px';
+                        pullToRefresh.style.opacity = pullDistance / 100;
+                    }
+                }
+            });
+
+            container.addEventListener('touchend', () => {
+                if (pullDistance > 60) {
+                    refreshData();
+                }
+                pullToRefresh.style.top = '-50px';
+                pullToRefresh.style.opacity = '0';
+                pullDistance = 0;
+            });
+        }
+
+        function updateDateDisplay() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        function loadFavorites() {
+            const savedFavorites = localStorage.getItem('favoriteMeals');
+            if (savedFavorites) {
+                FAVORITE_MEALS = JSON.parse(savedFavorites);
+                displayFavorites();
+            }
+        }
+
+        function displayFavorites() {
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            favoritesGrid.innerHTML = '';
+
+            if (Object.keys(FAVORITE_MEALS).length === 0) {
+                favoritesGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #a0a0a0; padding: 20px;">No favorites yet. Add entries to save them as favorites!</p>';
+                return;
+            }
+
+            Object.entries(FAVORITE_MEALS).forEach(([key, meal]) => {
+                const btn = document.createElement('button');
+                btn.className = 'favorite-btn';
+                btn.dataset.favorite = key;
+                btn.textContent = meal.name || meal.description || 'Favorite';
+                favoritesGrid.appendChild(btn);
+            });
+        }
+
+        function loadFavoriteMeal(favoriteKey) {
+            const meal = FAVORITE_MEALS[favoriteKey];
+            if (meal) {
+                document.getElementById('calories').value = meal.calories;
+                document.getElementById('protein').value = meal.protein;
+                document.getElementById('carbs').value = meal.carbs;
+                document.getElementById('fat').value = meal.fat;
+                document.getElementById('description').value = meal.description || '';
+                document.getElementById('mealType').value = meal.mealType || 'Snack';
+
+                // Animate button press
+                event.target.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    event.target.style.transform = 'scale(1)';
+                }, 150);
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            const formData = getFormData();
+
+            // Show loading state
+            setLoadingState(true);
+
+            try {
+                // Add to local storage immediately
+                addEntryToLocal(formData);
+
+                // Try to sync with server if online
+                if (isOnline && API_URL !== 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                    await submitToServer(formData);
+                }
+
+                // Show success
+                showSuccess();
+                clearForm();
+                updateTotalsDisplay();
+                updateHistoryDisplay();
+
+                // Apple Health integration
+                if (window.navigator.userAgent.indexOf('iPhone') !== -1 ||
+                    window.navigator.userAgent.indexOf('iPad') !== -1) {
+                    triggerAppleHealthIntegration(formData);
+                }
+
+            } catch (error) {
+                console.error('Error submitting entry:', error);
+                showError('Failed to sync with server. Entry saved locally.');
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const fields = ['calories', 'protein', 'carbs', 'fat'];
+
+            fields.forEach(field => {
+                const input = document.getElementById(field);
+                const value = parseFloat(input.value);
+                const errorElement = document.getElementById(field + 'Error');
+
+                if (isNaN(value) || value < 0) {
+                    errorElement.textContent = 'Please enter a valid number';
+                    errorElement.style.display = 'block';
+                    isValid = false;
+                } else {
+                    errorElement.style.display = 'none';
+                }
+            });
+
+            return isValid;
+        }
+
+        function getFormData() {
+            return {
+                calories: parseFloat(document.getElementById('calories').value) || 0,
+                protein: parseFloat(document.getElementById('protein').value) || 0,
+                carbs: parseFloat(document.getElementById('carbs').value) || 0,
+                fat: parseFloat(document.getElementById('fat').value) || 0,
+                mealType: document.getElementById('mealType').value,
+                description: document.getElementById('description').value.trim(),
+                timestamp: new Date().toISOString(),
+                date: new Date().toDateString()
+            };
+        }
+
+        async function submitToServer(data) {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+
+            return response.json();
+        }
+
+        function addEntryToLocal(entry) {
+            // Add to today's entries
+            todaysEntries.unshift(entry);
+
+            // Update daily totals
+            dailyTotals.calories += entry.calories;
+            dailyTotals.protein += entry.protein;
+            dailyTotals.carbs += entry.carbs;
+            dailyTotals.fat += entry.fat;
+
+            // Save to localStorage
+            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
+            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
+            localStorage.setItem('lastEntryDate', new Date().toDateString());
+        }
+
+        function loadTodaysData() {
+            const lastDate = localStorage.getItem('lastEntryDate');
+            const today = new Date().toDateString();
+
+            if (lastDate === today) {
+                // Load existing data
+                const savedEntries = localStorage.getItem('todaysEntries');
+                const savedTotals = localStorage.getItem('dailyTotals');
+
+                if (savedEntries) {
+                    todaysEntries = JSON.parse(savedEntries);
+                }
+
+                if (savedTotals) {
+                    dailyTotals = JSON.parse(savedTotals);
+                }
+            } else {
+                // Reset for new day
+                todaysEntries = [];
+                dailyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+                localStorage.removeItem('todaysEntries');
+                localStorage.removeItem('dailyTotals');
+            }
+
+            updateTotalsDisplay();
+            updateHistoryDisplay();
+        }
+
+        function updateTotalsDisplay() {
+            // Update totals with animation
+            animateValue('totalCalories', Math.round(dailyTotals.calories));
+            animateValue('totalProtein', Math.round(dailyTotals.protein) + 'g');
+            animateValue('totalCarbs', Math.round(dailyTotals.carbs) + 'g');
+            animateValue('totalFat', Math.round(dailyTotals.fat) + 'g');
+
+            // Update progress bars
+            updateProgressBar('caloriesProgress', dailyTotals.calories, DAILY_GOALS.calories);
+            updateProgressBar('proteinProgress', dailyTotals.protein, DAILY_GOALS.protein);
+            updateProgressBar('carbsProgress', dailyTotals.carbs, DAILY_GOALS.carbs);
+            updateProgressBar('fatProgress', dailyTotals.fat, DAILY_GOALS.fat);
+        }
+
+        function animateValue(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            element.textContent = newValue;
+
+            // Trigger animation
+            element.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        function updateProgressBar(elementId, current, goal) {
+            const percentage = Math.min((current / goal) * 100, 100);
+            const progressBar = document.getElementById(elementId);
+            progressBar.style.width = percentage + '%';
+        }
+
+        function updateHistoryDisplay() {
+            historyContainer.innerHTML = '';
+
+            if (todaysEntries.length === 0) {
+                historyContainer.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 20px;">No entries today</p>';
+                return;
+            }
+
+            // Show last 5 entries
+            const entriesToShow = todaysEntries.slice(0, 5);
+
+            entriesToShow.forEach((entry, index) => {
+                const historyItem = createHistoryItem(entry, index);
+                historyContainer.appendChild(historyItem);
+            });
+        }
+
+        function createHistoryItem(entry, index) {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <div class="history-header">
+                    <div>
+                        <strong>${entry.mealType}</strong>
+                        ${entry.description ? `<div style="font-size: 12px; color: #a0a0a0; margin-top: 2px;">${entry.description}</div>` : ''}
+                    </div>
+                    <div>
+                        <span class="history-time">${formatTime(entry.timestamp)}</span>
+                        <button class="delete-btn" onclick="deleteEntry(${index})">Delete</button>
+                    </div>
+                </div>
+                <div class="history-details">
+                    <div class="history-macro">
+                        <div class="history-macro-value">${Math.round(entry.calories)}</div>
+                        <div class="history-macro-label">Cal</div>
+                    </div>
+                    <div class="history-macro">
+                        <div class="history-macro-value">${Math.round(entry.protein)}g</div>
+                        <div class="history-macro-label">Protein</div>
+                    </div>
+                    <div class="history-macro">
+                        <div class="history-macro-value">${Math.round(entry.carbs)}g</div>
+                        <div class="history-macro-label">Carbs</div>
+                    </div>
+                    <div class="history-macro">
+                        <div class="history-macro-value">${Math.round(entry.fat)}g</div>
+                        <div class="history-macro-label">Fat</div>
+                    </div>
+                </div>
+            `;
+
+            return div;
+        }
+
+        function deleteEntry(index) {
+            const entry = todaysEntries[index];
+
+            // Update totals
+            dailyTotals.calories -= entry.calories;
+            dailyTotals.protein -= entry.protein;
+            dailyTotals.carbs -= entry.carbs;
+            dailyTotals.fat -= entry.fat;
+
+            // Remove from array
+            todaysEntries.splice(index, 1);
+
+            // Update localStorage
+            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
+            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
+
+            // Update displays
+            updateTotalsDisplay();
+            updateHistoryDisplay();
+
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        function setLoadingState(loading) {
+            if (loading) {
+                submitBtn.disabled = true;
+                submitText.style.opacity = '0';
+                document.getElementById('loading').style.display = 'block';
+            } else {
+                submitBtn.disabled = false;
+                submitText.style.opacity = '1';
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function showSuccess() {
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function showError(message) {
+            // You could create an error message element similar to successMessage
+            console.error(message);
+        }
+
+        function clearForm() {
+            form.reset();
+            document.querySelectorAll('.error-message').forEach(error => {
+                error.style.display = 'none';
+            });
+        }
+
+        function checkOnlineStatus() {
+            if (!isOnline) {
+                offlineIndicator.style.display = 'block';
+            }
+        }
+
+        function refreshData() {
+            // Simulate refresh - in a real app, you might sync with server
+            loadTodaysData();
+
+            // Show refresh animation
+            const pullToRefresh = document.getElementById('pullToRefresh');
+            pullToRefresh.textContent = '✓';
+            setTimeout(() => {
+                pullToRefresh.textContent = '↓';
+            }, 1000);
+        }
+
+        function triggerAppleHealthIntegration(data) {
+            // Create Shortcuts URL for Apple Health
+            const shortcutURL = `shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(JSON.stringify({
+                calories: data.calories,
+                protein: data.protein,
+                carbs: data.carbs,
+                fat: data.fat,
+                mealType: data.mealType
+            }))}`;
+
+            // Open the shortcut (will return to app automatically)
+            if (window.navigator.userAgent.indexOf('iPhone') !== -1 ||
+                window.navigator.userAgent.indexOf('iPad') !== -1) {
+
+                setTimeout(() => {
+                    window.location.href = shortcutURL;
+                }, 500);
+            }
+        }
+
+        // Service Worker registration for offline functionality
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript,console.log("SW registered")');
+        }
+
+        // Add to home screen prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Show install button after a delay
+            setTimeout(() => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>
