@@ -962,16 +962,16 @@
         let currentlyLoadedFavorite = null;
         let favoriteIndicatorTimeout = null;
 
-        // DOM elements
-        const form = document.getElementById('nutritionForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const historyContainer = document.getElementById('historyContainer');
-        const dateDisplay = document.getElementById('dateDisplay');
-        const appleHealthOptions = document.getElementById('appleHealthOptions');
-        const favoriteIndicator = document.getElementById('favoriteIndicator');
-        const undoBtn = document.getElementById('undoBtn');
-        const addFavoriteBtn = document.getElementById('addFavoriteBtn');
-        const testPanel = document.getElementById('testPanel');
+        // DOM elements - Initialize as let, will be assigned after DOM loads
+        let form;
+        let submitBtn;
+        let historyContainer;
+        let dateDisplay;
+        let appleHealthOptions;
+        let favoriteIndicator;
+        let undoBtn;
+        let addFavoriteBtn;
+        let testPanel;
 
         // Cached DOM queries
         const domCache = {};
@@ -984,6 +984,17 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            // Assign DOM elements after DOM is loaded
+            form = document.getElementById('nutritionForm');
+            submitBtn = document.getElementById('submitBtn');
+            historyContainer = document.getElementById('historyContainer');
+            dateDisplay = document.getElementById('dateDisplay');
+            appleHealthOptions = document.getElementById('appleHealthOptions');
+            favoriteIndicator = document.getElementById('favoriteIndicator');
+            undoBtn = document.getElementById('undoBtn');
+            addFavoriteBtn = document.getElementById('addFavoriteBtn');
+            testPanel = document.getElementById('testPanel');
+            
             initializeApp();
             setupEventListeners();
             updateDateDisplay();
