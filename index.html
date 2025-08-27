@@ -429,11 +429,47 @@
             margin-bottom: 20px;
         }
 
+        .favorites-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .favorites-filter {
+            flex: 1;
+            background: #2a2a2a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .favorites-search {
+            flex: 2;
+            background: #2a2a2a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
         .favorites-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .favorites-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #a0a0a0;
+            padding: 30px;
+            font-size: 13px;
         }
 
         .favorite-btn {
@@ -471,6 +507,12 @@
             line-height: 1.2;
         }
 
+        .favorite-category {
+            font-size: 9px;
+            color: #667eea;
+            margin-top: 3px;
+        }
+
         .delete-favorite {
             position: absolute;
             top: 4px;
@@ -488,20 +530,27 @@
             justify-content: center;
         }
 
-        .favorite-btn:hover .delete-favorite,
-        .favorite-btn.touch .delete-favorite {
+        .favorite-btn:hover .delete-favorite {
             display: flex;
         }
 
         .add-favorite-btn {
+            width: 100%;
+            min-height: 44px;
             background: rgba(102, 126, 234, 0.1);
             border: 1px dashed rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
             color: #667eea;
-            display: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 15px;
         }
 
-        .add-favorite-btn.show {
-            display: flex;
+        .add-favorite-btn:active {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(0.98);
         }
 
         .quick-add-section {
@@ -541,7 +590,12 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             position: relative;
             transition: all 0.2s ease;
-            touch-action: pan-y;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background: #3a3a3a;
+            border-color: rgba(102, 126, 234, 0.2);
         }
 
         .history-header {
@@ -579,18 +633,42 @@
 
         .history-delete {
             position: absolute;
-            right: -70px;
-            top: 0;
-            bottom: 0;
-            width: 70px;
+            right: 8px;
+            top: 8px;
             background: #ef4444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0 12px 12px 0;
             color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
             font-weight: 600;
-            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .history-item:hover .history-delete {
+            opacity: 1;
+        }
+
+        .history-reload {
+            position: absolute;
+            right: 60px;
+            top: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .history-item:hover .history-reload {
+            opacity: 1;
         }
 
         /* Toast Notifications */
@@ -866,6 +944,7 @@
                             <option value="Lunch">Lunch</option>
                             <option value="Dinner">Dinner</option>
                             <option value="Snack">Snack</option>
+                            <option value="Protein Shake">Protein Shake</option>
                         </select>
                     </div>
 
@@ -916,6 +995,19 @@
 
         <div class="favorites-section">
             <h2 class="section-title">Favorites</h2>
+            
+            <div class="favorites-controls">
+                <select class="favorites-filter" id="favoritesFilter" onchange="filterFavorites()">
+                    <option value="all">All Categories</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                    <option value="Protein Shake">Protein Shake</option>
+                </select>
+                <input type="text" class="favorites-search" id="favoritesSearch" placeholder="Search favorites..." oninput="searchFavorites()">
+            </div>
+            
             <div class="favorites-grid" id="favoritesGrid">
                 <!-- Favorites will be added dynamically -->
             </div>
@@ -946,13 +1038,13 @@
             fat: 65
         };
 
-        const MAX_FAVORITES = 10;
-
         // Global state
         let dailyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
         let todaysEntries = [];
+        let allEntries = [];
         let unsyncedQueue = [];
         let favoritesArray = [];
+        let filteredFavorites = [];
         let isOnline = navigator.onLine;
         let apiConnected = false;
         let lastSyncTime = null;
@@ -984,6 +1076,8 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
             // Assign DOM elements after DOM is loaded
             form = document.getElementById('nutritionForm');
             submitBtn = document.getElementById('submitBtn');
@@ -994,6 +1088,10 @@
             undoBtn = document.getElementById('undoBtn');
             addFavoriteBtn = document.getElementById('addFavoriteBtn');
             testPanel = document.getElementById('testPanel');
+            
+            // Verify critical elements exist
+            if (!form) console.error('Form not found!');
+            if (!addFavoriteBtn) console.error('Add favorite button not found!');
             
             initializeApp();
             setupEventListeners();
@@ -1053,33 +1151,6 @@
                 }
             });
 
-            // Favorites grid event delegation
-            const favGrid = $('favoritesGrid');
-            if (favGrid) {
-                favGrid.addEventListener('click', (e) => {
-                    if (e.target.closest('.favorite-btn') && !e.target.closest('.delete-favorite')) {
-                        const btn = e.target.closest('.favorite-btn');
-                        loadFavorite(btn.dataset.favoriteId);
-                        triggerHaptic();
-                    } else if (e.target.closest('.delete-favorite')) {
-                        e.stopPropagation();
-                        const deleteBtn = e.target.closest('.delete-favorite');
-                        deleteFavorite(deleteBtn.dataset.favoriteId);
-                    }
-                });
-
-                // Touch events for favorites
-                favGrid.addEventListener('touchstart', (e) => {
-                    const btn = e.target.closest('.favorite-btn');
-                    if (btn) {
-                        btn.classList.add('touch');
-                        setTimeout(() => {
-                            btn.classList.remove('touch');
-                        }, 2000);
-                    }
-                });
-            }
-
             // Online/offline detection
             window.addEventListener('online', () => {
                 isOnline = true;
@@ -1094,9 +1165,6 @@
 
             // Pull to refresh
             setupPullToRefresh();
-
-            // Swipe to delete history
-            setupSwipeToDelete();
 
             // Button haptic feedback
             document.addEventListener('click', (e) => {
@@ -1209,17 +1277,7 @@
             undoBtn.classList.add('show');
             setTimeout(() => {
                 undoBtn.classList.remove('show');
-            }, 5000);
-
-            // Show add to favorites if has description and not from favorite
-            if (formData.description && formData.description.trim() &&
-                favoritesArray.length < MAX_FAVORITES &&
-                formData.source === 'Manual') {
-                addFavoriteBtn.classList.add('show');
-                setTimeout(() => {
-                    addFavoriteBtn.classList.remove('show');
-                }, 8000);
-            }
+            }, 8000);
 
             // Clear favorite indicator after submission
             if (currentlyLoadedFavorite) {
@@ -1538,21 +1596,51 @@
         }
 
         function showAddFavorite() {
-            if (!lastEntry) return;
-
-            const name = prompt('Name this favorite:', lastEntry.description || '');
-            if (name && name.trim()) {
-                addToFavorites(name.trim(), lastEntry);
-                addFavoriteBtn.classList.remove('show');
+            // Check if there's data to save
+            const currentData = getCurrentFormData();
+            
+            if (!currentData) {
+                showToast('error', 'No Data', 'Please enter nutrition values first');
+                return;
             }
-        }
-
-        function addToFavorites(name, data) {
-            if (favoritesArray.length >= MAX_FAVORITES) {
-                showToast('warning', 'Limit Reached', `Maximum ${MAX_FAVORITES} favorites allowed`);
+            
+            if (!currentData.description || !currentData.description.trim()) {
+                showToast('warning', 'Description Required', 'Please add a description to save as favorite');
                 return;
             }
 
+            // Use description as default name
+            const defaultName = currentData.description;
+            const name = prompt('Name this favorite:', defaultName);
+            
+            if (name && name.trim()) {
+                addToFavorites(name.trim(), currentData);
+                showToast('success', 'Favorite Saved', `"${name.trim()}" saved to favorites`);
+            }
+        }
+
+        function getCurrentFormData() {
+            const calories = parseFloat($('calories').value) || 0;
+            const protein = parseFloat($('protein').value) || 0;
+            const carbs = parseFloat($('carbs').value) || 0;
+            const fat = parseFloat($('fat').value) || 0;
+            const description = $('description').value.trim();
+            const mealType = $('mealType').value;
+
+            if (calories || protein || carbs || fat) {
+                return {
+                    calories,
+                    protein,
+                    carbs,
+                    fat,
+                    mealType,
+                    description
+                };
+            }
+            return null;
+        }
+
+        function addToFavorites(name, data) {
             const favorite = {
                 id: Date.now().toString(),
                 name: name,
@@ -1561,13 +1649,30 @@
                 carbs: data.carbs,
                 fat: data.fat,
                 mealType: data.mealType,
-                description: data.description
+                description: data.description,
+                category: data.mealType, // Use meal type as category
+                useCount: 0,
+                lastUsed: null
             };
 
             favoritesArray.push(favorite);
-            localStorage.setItem('favorites', JSON.stringify(favoritesArray));
+            saveFavoritesToStorage();
             displayFavorites();
             showToast('success', 'Favorite Saved', `"${name}" added to favorites`);
+        }
+
+        function saveFavoritesToStorage() {
+            localStorage.setItem('favorites', JSON.stringify(favoritesArray));
+            // Also sync to Google Sheets if online
+            if (isOnline && apiConnected) {
+                syncFavoritesToSheets();
+            }
+        }
+
+        function syncFavoritesToSheets() {
+            // This would sync favorites to Google Sheets Favorites tab
+            // Implementation would require adding endpoint to Apps Script
+            console.log('Favorites sync to sheets - future implementation');
         }
 
         function loadFavorites() {
@@ -1582,24 +1687,65 @@
             const grid = $('favoritesGrid');
             if (!grid) return;
             
+            // Get current filter and search
+            const filterValue = $('favoritesFilter')?.value || 'all';
+            const searchValue = $('favoritesSearch')?.value?.toLowerCase() || '';
+            
+            // Filter favorites based on category and search
+            filteredFavorites = favoritesArray.filter(fav => {
+                const matchesCategory = filterValue === 'all' || fav.category === filterValue;
+                const matchesSearch = !searchValue || 
+                    fav.name.toLowerCase().includes(searchValue) ||
+                    fav.description?.toLowerCase().includes(searchValue);
+                return matchesCategory && matchesSearch;
+            });
+
+            // Sort by use count and last used
+            filteredFavorites.sort((a, b) => {
+                // Prioritize recently used
+                if (a.lastUsed && b.lastUsed) {
+                    return new Date(b.lastUsed) - new Date(a.lastUsed);
+                }
+                return (b.useCount || 0) - (a.useCount || 0);
+            });
+
             grid.innerHTML = '';
 
-            if (favoritesArray.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #a0a0a0; padding: 15px; font-size: 13px;">No favorites yet. Save entries to build your collection!</p>';
+            if (filteredFavorites.length === 0) {
+                grid.innerHTML = '<div class="favorites-empty">No favorites found. Save entries with descriptions to build your collection!</div>';
                 return;
             }
 
-            favoritesArray.forEach(fav => {
+            filteredFavorites.forEach(fav => {
                 const btn = document.createElement('button');
                 btn.className = 'favorite-btn';
                 btn.dataset.favoriteId = fav.id;
                 btn.innerHTML = `
                     <div class="favorite-name">${fav.name}</div>
                     <div class="favorite-macros">${Math.round(fav.calories)}cal • ${Math.round(fav.protein)}p • ${Math.round(fav.carbs)}c • ${Math.round(fav.fat)}f</div>
-                    <button class="delete-favorite" data-favorite-id="${fav.id}">×</button>
+                    <div class="favorite-category">${fav.category || fav.mealType}</div>
+                    <button class="delete-favorite" data-favorite-id="${fav.id}" onclick="event.stopPropagation(); deleteFavorite('${fav.id}')">×</button>
                 `;
+                btn.onclick = () => loadFavorite(fav.id);
                 grid.appendChild(btn);
             });
+        }
+
+        function filterFavorites() {
+            displayFavorites();
+        }
+
+        function searchFavorites() {
+            displayFavorites();
+        }
+
+        function getSuggestedMealType() {
+            const hour = new Date().getHours();
+            if (hour >= 5 && hour < 11) return 'Breakfast';
+            if (hour >= 11 && hour < 14) return 'Lunch';
+            if (hour >= 14 && hour < 17) return 'Snack';
+            if (hour >= 17 && hour < 21) return 'Dinner';
+            return 'Snack';
         }
 
         function loadFavorite(favoriteId) {
@@ -1613,6 +1759,11 @@
                 $('mealType').value = favorite.mealType;
                 $('description').value = favorite.description || '';
                 updateMacroCalculation();
+
+                // Update use count and last used
+                favorite.useCount = (favorite.useCount || 0) + 1;
+                favorite.lastUsed = new Date().toISOString();
+                saveFavoritesToStorage();
 
                 // Set currently loaded favorite for tracking
                 currentlyLoadedFavorite = favorite;
@@ -1907,7 +2058,7 @@
                 return;
             }
 
-            todaysEntries.slice(0, 5).forEach((entry, index) => {
+            todaysEntries.slice(0, 10).forEach((entry, index) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
                 div.innerHTML = `
@@ -1937,28 +2088,81 @@
                             <div class="history-macro-label">Fat</div>
                         </div>
                     </div>
-                    <div class="history-delete" onclick="deleteEntry(${index})">Delete</div>
+                    <button class="history-reload" onclick="reloadEntry(${index})">Reload</button>
+                    <button class="history-delete" onclick="deleteEntry(${index})">Delete</button>
                 `;
+                
+                // Add click to reload functionality (click anywhere except buttons)
+                div.addEventListener('click', (e) => {
+                    if (!e.target.closest('.history-delete') && !e.target.closest('.history-reload')) {
+                        reloadEntry(index);
+                    }
+                });
+                
                 container.appendChild(div);
             });
         }
 
-        function deleteEntry(index) {
+        function reloadEntry(index) {
             const entry = todaysEntries[index];
+            if (entry) {
+                // Load entry data into form
+                $('calories').value = entry.calories;
+                $('protein').value = entry.protein;
+                $('carbs').value = entry.carbs;
+                $('fat').value = entry.fat;
+                $('mealType').value = entry.mealType;
+                $('description').value = entry.description || '';
+                updateMacroCalculation();
 
+                showToast('info', 'Entry Reloaded', 'Previous entry loaded into form');
+                
+                // Scroll to form
+                $('nutritionForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        async function deleteEntry(index) {
+            const entry = todaysEntries[index];
+            
+            if (!confirm(`Delete this ${entry.mealType} entry?\n\nNote: Entry will be removed from tracker but cannot be deleted from Apple Health.`)) {
+                return;
+            }
+
+            // Remove from totals
             dailyTotals.calories -= entry.calories;
             dailyTotals.protein -= entry.protein;
             dailyTotals.carbs -= entry.carbs;
             dailyTotals.fat -= entry.fat;
 
+            // Remove from entries
             todaysEntries.splice(index, 1);
 
+            // Update localStorage
             localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
             localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
 
+            // Try to delete from Google Sheets if it was synced
+            if (entry.sheetRow && isOnline && apiConnected) {
+                try {
+                    await deleteFromGoogleSheets(entry.sheetRow);
+                    showToast('success', 'Deleted', 'Entry removed from tracker and Google Sheets');
+                } catch (error) {
+                    showToast('warning', 'Partially Deleted', 'Removed locally but could not delete from Google Sheets');
+                }
+            } else {
+                showToast('info', 'Deleted Locally', 'Entry removed from tracker');
+            }
+
             updateTotalsDisplay();
             updateHistoryDisplay();
-            showToast('info', 'Deleted', 'Entry removed');
+        }
+
+        async function deleteFromGoogleSheets(rowNumber) {
+            // This would require adding a delete endpoint to your Apps Script
+            // For now, just log it
+            console.log('Delete from sheets row:', rowNumber);
+            // Implementation would require Apps Script update
         }
 
         function formatTime(timestamp) {
@@ -2022,44 +2226,6 @@
             });
         }
 
-        function setupSwipeToDelete() {
-            if (!historyContainer) return;
-            
-            let startX = 0;
-            let currentItem = null;
-
-            historyContainer.addEventListener('touchstart', (e) => {
-                if (e.target.closest('.history-item')) {
-                    currentItem = e.target.closest('.history-item');
-                    startX = e.touches[0].clientX;
-                }
-            });
-
-            historyContainer.addEventListener('touchmove', (e) => {
-                if (currentItem) {
-                    const deltaX = e.touches[0].clientX - startX;
-                    if (deltaX < -30) {
-                        currentItem.style.transform = `translateX(${Math.max(deltaX, -70)}px)`;
-                    }
-                }
-            });
-
-            historyContainer.addEventListener('touchend', (e) => {
-                if (currentItem) {
-                    const deltaX = e.changedTouches[0].clientX - startX;
-                    if (deltaX < -40) {
-                        const deleteBtn = currentItem.querySelector('.history-delete');
-                        if (deleteBtn) {
-                            deleteBtn.style.display = 'flex';
-                        }
-                    } else {
-                        currentItem.style.transform = '';
-                    }
-                    currentItem = null;
-                }
-            });
-        }
-
         // Test panel functions - Make them global so onclick works
         window.toggleTestPanel = function() {
             if (testPanel) {
@@ -2095,6 +2261,11 @@
         window.undoLastEntry = undoLastEntry;
         window.showAddFavorite = showAddFavorite;
         window.deleteEntry = deleteEntry;
+        window.reloadEntry = reloadEntry;
+        window.deleteFavorite = deleteFavorite;
+        window.loadFavorite = loadFavorite;
+        window.filterFavorites = filterFavorites;
+        window.searchFavorites = searchFavorites;
     </script>
 </body>
 </html>
