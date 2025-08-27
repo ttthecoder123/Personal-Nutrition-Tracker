@@ -1710,7 +1710,10 @@
         }
 
         // Finish daily tracking function
-        function finishDailyTracking() {
+        async function finishDailyTracking() {
+            // Refresh totals first to ensure we have the latest data
+            await loadTodaysTotals();
+            
             if (dailyTotals.calories === 0 && dailyTotals.protein === 0 && dailyTotals.carbs === 0 && dailyTotals.fat === 0) {
                 showToast('warning', 'No Data', 'Add some entries before finishing daily tracking');
                 return;
