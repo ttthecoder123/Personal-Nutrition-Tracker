@@ -165,6 +165,21 @@
             letter-spacing: 0.5px;
         }
 
+        .remaining-amount {
+            font-size: 10px;
+            color: #667eea;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .remaining-amount.over {
+            color: #ef4444;
+        }
+
+        .remaining-amount.complete {
+            color: #10b981;
+        }
+
         .progress-bar {
             width: 100%;
             height: 4px;
@@ -662,6 +677,51 @@
             transition: all 0.2s ease;
         }
 
+        .daily-finish-section {
+            margin: 30px 0 20px 0;
+            padding-bottom: env(safe-area-inset-bottom, 15px);
+        }
+
+        .daily-finish-btn {
+            width: 100%;
+            min-height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            border-radius: 20px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+        }
+
+        .daily-finish-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .finish-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .finish-text {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .finish-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
         .nutrition-description {
             grid-column: 1 / -1;
         }
@@ -717,6 +777,7 @@
                 <div class="total-item">
                     <div class="total-value" id="totalCalories">0</div>
                     <div class="total-label">Calories</div>
+                    <div class="remaining-amount" id="remainingCalories">2000 left</div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="caloriesProgress"></div>
                     </div>
@@ -724,6 +785,7 @@
                 <div class="total-item">
                     <div class="total-value" id="totalProtein">0g</div>
                     <div class="total-label">Protein</div>
+                    <div class="remaining-amount" id="remainingProtein">150g left</div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="proteinProgress"></div>
                     </div>
@@ -731,6 +793,7 @@
                 <div class="total-item">
                     <div class="total-value" id="totalCarbs">0g</div>
                     <div class="total-label">Carbs</div>
+                    <div class="remaining-amount" id="remainingCarbs">200g left</div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="carbsProgress"></div>
                     </div>
@@ -738,6 +801,7 @@
                 <div class="total-item">
                     <div class="total-value" id="totalFat">0g</div>
                     <div class="total-label">Fat</div>
+                    <div class="remaining-amount" id="remainingFat">65g left</div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="fatProgress"></div>
                     </div>
@@ -866,6 +930,15 @@
             <div id="historyContainer">
                 <!-- History will be loaded here -->
             </div>
+        </div>
+
+        <!-- Daily Finish Button -->
+        <div class="daily-finish-section">
+            <button class="daily-finish-btn" id="dailyFinishBtn" onclick="finishDailyTracking()">
+                <span class="finish-icon">🎯</span>
+                <span class="finish-text">Finish Daily Tracking</span>
+                <span class="finish-subtitle">Send to Apple Health</span>
+            </button>
         </div>
     </div>
 
@@ -1100,6 +1173,8 @@
                 setTimeout(() => {
                     $('nutritionForm').reset();
                     $('macroCalc').style.display = 'none';
+                    currentFavorite = null; // Clear favorite reference
+                    hideFavoriteIndicator(); // Hide favorite indicator
                 }, 1500);
 
             } catch (error) {
@@ -1128,6 +1203,9 @@
                 client_id: getClientId(),
                 date: new Date().toISOString().split('T')[0]
             };
+            
+            // Debug log to check for issues
+            console.log('Form data being submitted:', data);
             return data;
         }
 
@@ -1457,11 +1535,34 @@
             $('totalCarbs').textContent = Math.round(dailyTotals.carbs) + 'g';
             $('totalFat').textContent = Math.round(dailyTotals.fat) + 'g';
 
+            // Update remaining amounts
+            updateRemainingAmount('remainingCalories', dailyTotals.calories, DAILY_GOALS.calories, '');
+            updateRemainingAmount('remainingProtein', dailyTotals.protein, DAILY_GOALS.protein, 'g');
+            updateRemainingAmount('remainingCarbs', dailyTotals.carbs, DAILY_GOALS.carbs, 'g');
+            updateRemainingAmount('remainingFat', dailyTotals.fat, DAILY_GOALS.fat, 'g');
+
             // Update progress bars
             updateProgressBar('caloriesProgress', dailyTotals.calories, DAILY_GOALS.calories);
             updateProgressBar('proteinProgress', dailyTotals.protein, DAILY_GOALS.protein);
             updateProgressBar('carbsProgress', dailyTotals.carbs, DAILY_GOALS.carbs);
             updateProgressBar('fatProgress', dailyTotals.fat, DAILY_GOALS.fat);
+        }
+
+        // Update remaining amount display
+        function updateRemainingAmount(elementId, current, goal, unit) {
+            const element = $(elementId);
+            const remaining = goal - current;
+            
+            if (remaining > 0) {
+                element.textContent = `${Math.round(remaining)}${unit} left`;
+                element.className = 'remaining-amount';
+            } else if (remaining === 0) {
+                element.textContent = `Goal reached!`;
+                element.className = 'remaining-amount complete';
+            } else {
+                element.textContent = `${Math.round(Math.abs(remaining))}${unit} over`;
+                element.className = 'remaining-amount over';
+            }
         }
 
         // Update progress bar
@@ -1595,22 +1696,42 @@
             }
         }
 
-        // Apple Health integration
+        // Apple Health integration - now sends daily totals
         function logToAppleHealth() {
-            if (!lastEntry) {
-                showToast('error', 'No Entry', 'Submit an entry first');
-                return;
-            }
-
             const jsonData = JSON.stringify({
-                calories: lastEntry.calories,
-                protein: lastEntry.protein,
-                carbs: lastEntry.carbs,
-                fat: lastEntry.fat
+                calories: Math.round(dailyTotals.calories),
+                protein: Math.round(dailyTotals.protein),
+                carbs: Math.round(dailyTotals.carbs),
+                fat: Math.round(dailyTotals.fat)
             });
 
             const url = `shortcuts://x-callback-url/run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(jsonData)}`;
             window.location.href = url;
+        }
+
+        // Finish daily tracking function
+        function finishDailyTracking() {
+            if (dailyTotals.calories === 0 && dailyTotals.protein === 0 && dailyTotals.carbs === 0 && dailyTotals.fat === 0) {
+                showToast('warning', 'No Data', 'Add some entries before finishing daily tracking');
+                return;
+            }
+
+            // Show confirmation
+            const caloriesMsg = `${Math.round(dailyTotals.calories)} calories`;
+            const proteinMsg = `${Math.round(dailyTotals.protein)}g protein`;
+            const carbsMsg = `${Math.round(dailyTotals.carbs)}g carbs`;
+            const fatMsg = `${Math.round(dailyTotals.fat)}g fat`;
+            
+            const message = `Send daily totals to Apple Health?\n\n${caloriesMsg}\n${proteinMsg}\n${carbsMsg}\n${fatMsg}`;
+            
+            if (confirm(message)) {
+                if (isIOS()) {
+                    logToAppleHealth();
+                    showToast('success', 'Sent to Apple Health', 'Daily nutrition totals logged');
+                } else {
+                    showToast('info', 'Daily Summary', `${caloriesMsg}, ${proteinMsg}, ${carbsMsg}, ${fatMsg}`);
+                }
+            }
         }
 
         // Helper functions
@@ -1646,13 +1767,7 @@
         }
 
         function showPostSubmitButtons() {
-            if (isIOS()) {
-                $('appleHealthOptions').classList.add('show');
-                setTimeout(() => {
-                    $('appleHealthOptions').classList.remove('show');
-                }, 10000);
-            }
-
+            // Only show undo button now - Apple Health will be handled by daily finish
             $('undoBtn').classList.add('show');
             setTimeout(() => {
                 $('undoBtn').classList.remove('show');
@@ -1908,6 +2023,7 @@
         window.deleteEntry = deleteEntry;
         window.reloadEntry = reloadEntry;
         window.undoLastEntry = undoLastEntry;
+        window.finishDailyTracking = finishDailyTracking;
     </script>
 </body>
 </html>
