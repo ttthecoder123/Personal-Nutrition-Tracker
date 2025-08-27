@@ -722,6 +722,56 @@
             font-weight: 500;
         }
 
+        .settings-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            color: #667eea;
+            font-size: 16px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .settings-btn:active {
+            transform: scale(0.95);
+        }
+
+        .close-settings-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: #ef4444;
+            font-size: 16px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-settings-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .close-settings-btn:active {
+            transform: scale(0.95);
+        }
+
+        .goals-section {
+            animation: slideIn 0.3s ease;
+        }
+
         .nutrition-description {
             grid-column: 1 / -1;
         }
@@ -773,6 +823,11 @@
         </div>
 
         <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div></div>
+                <button type="button" class="settings-btn" onclick="toggleGoalsSettings()" title="Settings">⚙️</button>
+            </div>
+            
             <div class="daily-totals">
                 <div class="total-item">
                     <div class="total-value" id="totalCalories">0</div>
@@ -806,6 +861,66 @@
                         <div class="progress-fill" id="fatProgress"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Goals Settings Section -->
+        <div class="goals-section" id="goalsSection" style="display: none;">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 class="section-title" style="margin-bottom: 0;">Daily Goals</h2>
+                    <button type="button" class="close-settings-btn" onclick="toggleGoalsSettings()">✕</button>
+                </div>
+                
+                <form id="goalsForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="goalCalories">Daily Calories</label>
+                            <div class="form-input-wrapper">
+                                <input type="number" class="form-input" id="goalCalories" name="goalCalories" placeholder="2000" min="1000" max="5000" inputmode="numeric">
+                                <div class="input-steppers">
+                                    <button type="button" class="stepper-btn" onclick="stepGoalValue('goalCalories', 100)">+</button>
+                                    <button type="button" class="stepper-btn" onclick="stepGoalValue('goalCalories', -100)">-</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="goalProtein">Protein (g)</label>
+                            <div class="form-input-wrapper">
+                                <input type="number" class="form-input" id="goalProtein" name="goalProtein" placeholder="150" min="50" max="300" step="5" inputmode="decimal">
+                                <div class="input-steppers">
+                                    <button type="button" class="stepper-btn" onclick="stepGoalValue('goalProtein', 10)">+</button>
+                                    <button type="button" class="stepper-btn" onclick="stepGoalValue('goalProtein', -10)">-</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="goalCarbs">Carbs (g)</label>
+                            <div class="form-input-wrapper">
+                                <input type="number" class="form-input" id="goalCarbs" name="goalCarbs" placeholder="200" min="50" max="400" step="5" inputmode="decimal">
+                                <div class="input-steppers">
+                                    <button type="button" class="stepper-btn" onclick="stepGoalValue('goalCarbs', 25)">+</button>
+                                    <button type="button" class="stepper-btn" onclick="stepGoalValue('goalCarbs', -25)">-</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="goalFat">Fat (g)</label>
+                            <div class="form-input-wrapper">
+                                <input type="number" class="form-input" id="goalFat" name="goalFat" placeholder="65" min="30" max="150" step="5" inputmode="decimal">
+                                <div class="input-steppers">
+                                    <button type="button" class="stepper-btn" onclick="stepGoalValue('goalFat', 5)">+</button>
+                                    <button type="button" class="stepper-btn" onclick="stepGoalValue('goalFat', -5)">-</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="saveGoalsBtn">💾 Save Goals</button>
+                </form>
             </div>
         </div>
 
@@ -952,8 +1067,8 @@
         // Initialize Supabase client
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Configuration
-        const DAILY_GOALS = {
+        // Configuration - now dynamic, loaded from database
+        let DAILY_GOALS = {
             calories: 2000,
             protein: 150,
             carbs: 200,
@@ -982,6 +1097,7 @@
 
             // Load initial data
             await Promise.all([
+                loadUserGoals(),
                 loadTodaysTotals(),
                 loadTodaysEntries(),
                 loadFavorites()
@@ -1039,6 +1155,15 @@
             const form = $('nutritionForm');
             if (form) {
                 form.addEventListener('submit', handleFormSubmit);
+            }
+
+            // Goals form submission
+            const goalsForm = $('goalsForm');
+            if (goalsForm) {
+                goalsForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    saveUserGoals();
+                });
             }
 
             // Input change handlers with debouncing
@@ -1237,6 +1362,108 @@
             }
 
             return true;
+        }
+
+        // Load user goals from database
+        async function loadUserGoals() {
+            try {
+                const clientId = getClientId();
+                
+                const { data, error } = await supabase
+                    .from('user_goals')
+                    .select('daily_calories, daily_protein, daily_carbs, daily_fat')
+                    .eq('client_id', clientId)
+                    .single();
+
+                if (error && error.code !== 'PGRST116') {
+                    throw error;
+                }
+
+                if (data) {
+                    DAILY_GOALS = {
+                        calories: data.daily_calories,
+                        protein: data.daily_protein,
+                        carbs: data.daily_carbs,
+                        fat: data.daily_fat
+                    };
+                }
+
+                // Update goals form with current values
+                populateGoalsForm();
+                
+            } catch (error) {
+                console.error('Error loading goals:', error);
+                // Keep default values if loading fails
+            }
+        }
+
+        // Save user goals to database
+        async function saveUserGoals() {
+            try {
+                const clientId = getClientId();
+                const goalsData = {
+                    client_id: clientId,
+                    daily_calories: parseInt($('goalCalories').value) || 2000,
+                    daily_protein: parseInt($('goalProtein').value) || 150,
+                    daily_carbs: parseInt($('goalCarbs').value) || 200,
+                    daily_fat: parseInt($('goalFat').value) || 65,
+                    updated_at: new Date().toISOString()
+                };
+
+                // Use upsert to insert or update
+                const { data, error } = await supabase
+                    .from('user_goals')
+                    .upsert(goalsData, { onConflict: 'client_id' })
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Update local goals
+                DAILY_GOALS = {
+                    calories: goalsData.daily_calories,
+                    protein: goalsData.daily_protein,
+                    carbs: goalsData.daily_carbs,
+                    fat: goalsData.daily_fat
+                };
+
+                // Refresh displays
+                updateTotalsDisplay();
+                toggleGoalsSettings();
+                
+                showToast('success', 'Goals Saved', 'Your daily goals have been updated');
+                
+            } catch (error) {
+                console.error('Error saving goals:', error);
+                showToast('error', 'Save Failed', error.message);
+            }
+        }
+
+        // Populate goals form with current values
+        function populateGoalsForm() {
+            $('goalCalories').value = DAILY_GOALS.calories;
+            $('goalProtein').value = DAILY_GOALS.protein;
+            $('goalCarbs').value = DAILY_GOALS.carbs;
+            $('goalFat').value = DAILY_GOALS.fat;
+        }
+
+        // Toggle goals settings visibility
+        function toggleGoalsSettings() {
+            const section = $('goalsSection');
+            if (section.style.display === 'none' || !section.style.display) {
+                section.style.display = 'block';
+                populateGoalsForm();
+                section.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        // Step goal values (for +/- buttons)
+        function stepGoalValue(field, amount) {
+            const input = $(field);
+            const current = parseInt(input.value) || 0;
+            input.value = Math.max(input.min || 0, current + amount);
         }
 
         // Load today's totals
@@ -1938,13 +2165,27 @@
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 );
 
+                -- Create user_goals table
+                CREATE TABLE IF NOT EXISTS user_goals (
+                    id BIGSERIAL PRIMARY KEY,
+                    client_id TEXT UNIQUE NOT NULL,
+                    daily_calories INTEGER NOT NULL DEFAULT 2000,
+                    daily_protein INTEGER NOT NULL DEFAULT 150,
+                    daily_carbs INTEGER NOT NULL DEFAULT 200,
+                    daily_fat INTEGER NOT NULL DEFAULT 65,
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+
                 -- Enable RLS
                 ALTER TABLE food_log ENABLE ROW LEVEL SECURITY;
                 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
+                ALTER TABLE user_goals ENABLE ROW LEVEL SECURITY;
 
                 -- Create policies
                 CREATE POLICY "Allow all operations on food_log" ON food_log FOR ALL USING (true);
                 CREATE POLICY "Allow all operations on favorites" ON favorites FOR ALL USING (true);
+                CREATE POLICY "Allow all operations on user_goals" ON user_goals FOR ALL USING (true);
             `;
 
             showToast('info', 'Creating Tables', 'Please run this SQL in your Supabase dashboard:');
@@ -2019,6 +2260,8 @@
 
         // Make functions global for onclick handlers
         window.stepValue = stepValue;
+        window.stepGoalValue = stepGoalValue;
+        window.toggleGoalsSettings = toggleGoalsSettings;
         window.logToAppleHealth = logToAppleHealth;
         window.saveAsFavorite = saveAsFavorite;
         window.loadFavorite = loadFavorite;
