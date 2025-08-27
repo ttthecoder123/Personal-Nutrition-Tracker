@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0a0a">
     <title>Nutrition Tracker</title>
-    
+
     <!-- Supabase Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -795,6 +795,19 @@
 
         <div class="favorites-section">
             <h2 class="section-title">Favorites</h2>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <select style="flex: 1; background: #2a2a2a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; color: #ffffff; font-size: 14px;" id="favoritesFilter" onchange="filterFavorites()">
+                    <option value="all">All Categories</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                    <option value="Protein Shake">Protein Shake</option>
+                </select>
+                <input type="text" style="flex: 2; background: #2a2a2a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; color: #ffffff; font-size: 14px;" id="favoritesSearch" placeholder="Search favorites..." oninput="filterFavorites()">
+            </div>
+
             <div class="favorites-grid" id="favoritesGrid">
                 <!-- Favorites will be loaded here -->
             </div>
@@ -810,10 +823,10 @@
 
     <script>
         // ============================================
-        // SUPABASE CONFIGURATION - REPLACE THESE!
+        // SUPABASE CONFIGURATION
         // ============================================
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'; // Replace with your URL
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'; // Replace with your anon key
+        const SUPABASE_URL = 'https://hvixlqyldvdzzxxgjxyh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXhscXlsZHZkenp4eGdqeHloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyNjE3MTUsImV4cCI6MjA3MTgzNzcxNX0.TeNv-BbxR39V3F-EWkf2FaXjs5P29nBmus14MR5TIRw';
 
         // Initialize Supabase client
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -840,24 +853,24 @@
         // Initialize app
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Initializing Nutrition Tracker with Supabase...');
-            
+
             // Check Supabase connection
             await testSupabaseConnection();
-            
+
             // Load initial data
             await Promise.all([
                 loadTodaysTotals(),
                 loadTodaysEntries(),
                 loadFavorites()
             ]);
-            
+
             // Setup UI
             updateDateDisplay();
             setupEventListeners();
-            
+
             // Setup real-time subscriptions
             setupRealtimeSubscriptions();
-            
+
             if (isIOS()) {
                 document.body.classList.add('ios');
             }
@@ -870,7 +883,7 @@
                     .from('food_log')
                     .select('count')
                     .limit(1);
-                
+
                 if (!error) {
                     isConnected = true;
                     updateConnectionStatus('connected');
@@ -927,19 +940,19 @@
                 if (error) throw error;
 
                 lastEntry = data;
-                
+
                 // Show success animation
                 showSuccessAnimation();
-                
+
                 // Reload data (real-time will also update)
                 await loadTodaysTotals();
                 await loadTodaysEntries();
-                
+
                 // Show action buttons
                 showPostSubmitButtons();
-                
+
                 showToast('success', 'Entry Logged!', 'Saved to database');
-                
+
                 // Clear form
                 setTimeout(() => {
                     $('nutritionForm').reset();
@@ -969,7 +982,8 @@
                 description: $('description').value.trim(),
                 source: currentFavorite ? 'Favorite' : 'Manual',
                 favorite_name: currentFavorite ? currentFavorite.name : null,
-                client_id: getClientId()
+                client_id: getClientId(),
+                date: new Date().toISOString().split('T')[0]
             };
             return data;
         }
@@ -1008,7 +1022,7 @@
         async function loadTodaysTotals() {
             try {
                 const today = new Date().toISOString().split('T')[0];
-                
+
                 const { data, error } = await supabase
                     .from('food_log')
                     .select('calories, protein, carbs, fat')
@@ -1041,7 +1055,7 @@
         async function loadTodaysEntries() {
             try {
                 const today = new Date().toISOString().split('T')[0];
-                
+
                 const { data, error } = await supabase
                     .from('food_log')
                     .select('*')
@@ -1136,7 +1150,7 @@
             // Update use count
             await supabase
                 .from('favorites')
-                .update({ 
+                .update({
                     use_count: (favorite.use_count || 0) + 1,
                     last_used: new Date().toISOString()
                 })
@@ -1170,12 +1184,33 @@
             const grid = $('favoritesGrid');
             grid.innerHTML = '';
 
-            if (favorites.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #a0a0a0; padding: 20px;">No favorites yet. Save entries to build your collection!</div>';
+            // Get filter values
+            const filterValue = $('favoritesFilter')?.value || 'all';
+            const searchValue = $('favoritesSearch')?.value?.toLowerCase() || '';
+
+            // Filter favorites
+            const filteredFavorites = favorites.filter(fav => {
+                const matchesCategory = filterValue === 'all' || fav.category === filterValue;
+                const matchesSearch = !searchValue ||
+                    fav.name.toLowerCase().includes(searchValue) ||
+                    (fav.description && fav.description.toLowerCase().includes(searchValue));
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filteredFavorites.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #a0a0a0; padding: 20px;">No favorites found. Save entries to build your collection!</div>';
                 return;
             }
 
-            favorites.forEach(fav => {
+            // Sort by use count and last used
+            filteredFavorites.sort((a, b) => {
+                if (a.last_used && b.last_used) {
+                    return new Date(b.last_used) - new Date(a.last_used);
+                }
+                return (b.use_count || 0) - (a.use_count || 0);
+            });
+
+            filteredFavorites.forEach(fav => {
                 const btn = document.createElement('button');
                 btn.className = 'favorite-btn';
                 btn.innerHTML = `
@@ -1302,13 +1337,13 @@
                     </div>
                     <button class="history-delete" onclick="deleteEntry(${entry.id})">Delete</button>
                 `;
-                
+
                 div.addEventListener('click', (e) => {
                     if (!e.target.closest('.history-delete')) {
                         reloadEntry(entry.id);
                     }
                 });
-                
+
                 container.appendChild(div);
             });
         }
@@ -1318,11 +1353,11 @@
             // Subscribe to changes in food_log table
             supabase
                 .channel('food_log_changes')
-                .on('postgres_changes', 
-                    { event: '*', schema: 'public', table: 'food_log' }, 
+                .on('postgres_changes',
+                    { event: '*', schema: 'public', table: 'food_log' },
                     async (payload) => {
                         console.log('Real-time update:', payload);
-                        
+
                         // Reload data when changes occur
                         await loadTodaysTotals();
                         await loadTodaysEntries();
@@ -1397,10 +1432,10 @@
 
         function formatTime(timestamp) {
             const date = new Date(timestamp);
-            return date.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit', 
-                hour12: true 
+            return date.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
             });
         }
 
@@ -1414,7 +1449,7 @@
             const btn = $('submitBtn');
             btn.classList.add('success');
             btn.innerHTML = '<span class="success-checkmark">✓</span>';
-            
+
             setTimeout(() => {
                 btn.innerHTML = 'Entry Logged!';
             }, 500);
@@ -1456,7 +1491,7 @@
         function showToast(type, title, message) {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            
+
             const icons = {
                 success: '✓',
                 error: '✗',
@@ -1473,7 +1508,7 @@
             `;
 
             $('toastContainer').appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.classList.add('show');
             }, 10);
@@ -1533,11 +1568,11 @@
             try {
                 await supabase.from('food_log').delete().neq('id', 0);
                 await supabase.from('favorites').delete().neq('id', 0);
-                
+
                 await loadTodaysTotals();
                 await loadTodaysEntries();
                 await loadFavorites();
-                
+
                 showToast('info', 'Cleared', 'All data deleted');
             } catch (error) {
                 showToast('error', 'Clear Failed', error.message);
@@ -1549,7 +1584,7 @@
                 // Get old data from localStorage
                 const oldEntries = JSON.parse(localStorage.getItem('todaysEntries') || '[]');
                 const oldFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-                
+
                 let migrated = 0;
 
                 // Migrate entries
@@ -1567,7 +1602,7 @@
                             favorite_name: entry.favoriteName,
                             client_id: entry.id
                         }]);
-                    
+
                     if (!error) migrated++;
                 }
 
@@ -1595,6 +1630,11 @@
             } catch (error) {
                 showToast('error', 'Migration Failed', error.message);
             }
+        }
+
+        // Filter favorites function
+        window.filterFavorites = function() {
+            displayFavorites();
         }
 
         // Make functions global for onclick handlers
