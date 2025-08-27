@@ -1033,41 +1033,52 @@
 
         function setupEventListeners() {
             // Form submission
-            form.addEventListener('submit', handleFormSubmit);
+            if (form) {
+                form.addEventListener('submit', handleFormSubmit);
+            }
 
             // Input change handlers with debouncing
             ['calories', 'protein', 'carbs', 'fat'].forEach(field => {
-                $(field).addEventListener('input', debounce(() => {
-                    updateMacroCalculation();
-                    triggerHaptic();
+                const element = $(field);
+                if (element) {
+                    element.addEventListener('input', debounce(() => {
+                        updateMacroCalculation();
+                        triggerHaptic();
 
-                    // Clear favorite indicator if user manually changes values
-                    if (currentlyLoadedFavorite) {
-                        hideFavoriteIndicator();
-                    }
-                }, 300));
+                        // Clear favorite indicator if user manually changes values
+                        if (currentlyLoadedFavorite) {
+                            hideFavoriteIndicator();
+                        }
+                    }, 300));
+                }
             });
 
             // Favorites grid event delegation
-            $('favoritesGrid').addEventListener('click', (e) => {
-                if (e.target.classList.contains('favorite-btn')) {
-                    loadFavorite(e.target.dataset.favoriteId);
-                    triggerHaptic();
-                } else if (e.target.classList.contains('delete-favorite')) {
-                    e.stopPropagation();
-                    deleteFavorite(e.target.dataset.favoriteId);
-                }
-            });
+            const favGrid = $('favoritesGrid');
+            if (favGrid) {
+                favGrid.addEventListener('click', (e) => {
+                    if (e.target.closest('.favorite-btn') && !e.target.closest('.delete-favorite')) {
+                        const btn = e.target.closest('.favorite-btn');
+                        loadFavorite(btn.dataset.favoriteId);
+                        triggerHaptic();
+                    } else if (e.target.closest('.delete-favorite')) {
+                        e.stopPropagation();
+                        const deleteBtn = e.target.closest('.delete-favorite');
+                        deleteFavorite(deleteBtn.dataset.favoriteId);
+                    }
+                });
 
-            // Touch events for favorites
-            $('favoritesGrid').addEventListener('touchstart', (e) => {
-                if (e.target.classList.contains('favorite-btn')) {
-                    e.target.classList.add('touch');
-                    setTimeout(() => {
-                        e.target.classList.remove('touch');
-                    }, 2000);
-                }
-            });
+                // Touch events for favorites
+                favGrid.addEventListener('touchstart', (e) => {
+                    const btn = e.target.closest('.favorite-btn');
+                    if (btn) {
+                        btn.classList.add('touch');
+                        setTimeout(() => {
+                            btn.classList.remove('touch');
+                        }, 2000);
+                    }
+                });
+            }
 
             // Online/offline detection
             window.addEventListener('online', () => {
@@ -1569,6 +1580,8 @@
 
         function displayFavorites() {
             const grid = $('favoritesGrid');
+            if (!grid) return;
+            
             grid.innerHTML = '';
 
             if (favoritesArray.length === 0) {
@@ -1982,6 +1995,8 @@
             let pullDistance = 0;
             const container = document.querySelector('.container');
             const pullIcon = $('pullToRefresh');
+            
+            if (!container || !pullIcon) return;
 
             container.addEventListener('touchstart', (e) => {
                 startY = e.touches[0].clientY;
@@ -2008,6 +2023,8 @@
         }
 
         function setupSwipeToDelete() {
+            if (!historyContainer) return;
+            
             let startX = 0;
             let currentItem = null;
 
@@ -2031,7 +2048,10 @@
                 if (currentItem) {
                     const deltaX = e.changedTouches[0].clientX - startX;
                     if (deltaX < -40) {
-                        currentItem.querySelector('.history-delete').style.display = 'flex';
+                        const deleteBtn = currentItem.querySelector('.history-delete');
+                        if (deleteBtn) {
+                            deleteBtn.style.display = 'flex';
+                        }
                     } else {
                         currentItem.style.transform = '';
                     }
@@ -2040,29 +2060,41 @@
             });
         }
 
-        // Test panel functions
-        function toggleTestPanel() {
-            testPanel.classList.toggle('show');
+        // Test panel functions - Make them global so onclick works
+        window.toggleTestPanel = function() {
+            if (testPanel) {
+                testPanel.classList.toggle('show');
+            }
         }
 
-        async function testAPIConnection() {
+        window.testAPIConnection = async function() {
             showToast('info', 'Testing...', 'Checking Google Sheets connection');
             await checkAPIConnection();
         }
 
-        async function forceSync() {
+        window.forceSync = async function() {
             showToast('info', 'Syncing...', 'Uploading unsynced entries');
             await checkAPIConnection();
             await processUnsyncedQueue();
             updateSyncInfo();
         }
 
-        function clearAllData() {
+        window.clearAllData = function() {
             if (confirm('Delete all data? This cannot be undone!')) {
                 localStorage.clear();
                 location.reload();
             }
         }
+
+        // Make these functions global for onclick handlers
+        window.stepValue = stepValue;
+        window.quickAdd = quickAdd;
+        window.logToAppleHealthSimple = logToAppleHealthSimple;
+        window.copyForAppleHealth = copyForAppleHealth;
+        window.showAppleHealthDebug = showAppleHealthDebug;
+        window.undoLastEntry = undoLastEntry;
+        window.showAddFavorite = showAddFavorite;
+        window.deleteEntry = deleteEntry;
     </script>
 </body>
 </html>
