@@ -95,6 +95,16 @@
             color: #666;
         }
 
+        .unsynced-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 8px;
+            padding: 1px 5px;
+            font-size: 9px;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -321,6 +331,23 @@
         }
 
         .apple-health-options.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .favorite-indicator {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #667eea;
+            text-align: center;
+            display: none;
+        }
+
+        .favorite-indicator.show {
             display: block;
             animation: slideIn 0.3s ease;
         }
@@ -621,6 +648,20 @@
             border: 1px solid rgba(102, 126, 234, 0.1);
         }
 
+        .macro-warning {
+            color: #fbbf24;
+        }
+
+        .pull-to-refresh {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
         .nutrition-description {
             grid-column: 1 / -1;
         }
@@ -643,6 +684,7 @@
         <div class="connection-status" onclick="toggleTestPanel()">
             <span class="status-dot" id="statusDot"></span>
             <span id="statusText">Connecting...</span>
+            <span class="unsynced-badge" id="unsyncedBadge" style="display: none;">0</span>
         </div>
         <div class="sync-info" id="syncInfo">Real-time sync</div>
     </div>
@@ -650,10 +692,13 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <div class="pull-to-refresh" id="pullToRefresh">↓</div>
+
     <!-- Test Panel -->
     <div class="test-panel" id="testPanel">
         <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #667eea;">⚙️ Database Controls</div>
         <button class="test-btn" onclick="testConnection()">Test Supabase</button>
+        <button class="test-btn" onclick="createTables()">Create Database Tables</button>
         <button class="test-btn" onclick="exportData()">Export Data</button>
         <button class="test-btn" onclick="clearAllData()">Clear All Data</button>
         <button class="test-btn" onclick="migrateFromLocalStorage()">Import from Old System</button>
@@ -703,6 +748,9 @@
         <div class="form-section">
             <h2 class="section-title">Add Entry</h2>
             <div class="card">
+                <!-- Favorite Indicator -->
+                <div class="favorite-indicator" id="favoriteIndicator"></div>
+
                 <form id="nutritionForm">
                     <div class="form-row">
                         <div class="form-group">
@@ -846,6 +894,8 @@
         let lastEntry = null;
         let currentFavorite = null;
         let isConnected = false;
+        let favoriteIndicatorTimeout = null;
+        let toastCount = 0;
 
         // DOM elements
         const $ = (id) => document.getElementById(id);
@@ -879,23 +929,34 @@
         // Test Supabase connection
         async function testSupabaseConnection() {
             try {
+                // First check if tables exist, if not suggest creating them
                 const { data, error } = await supabase
                     .from('food_log')
                     .select('count')
                     .limit(1);
 
-                if (!error) {
-                    isConnected = true;
-                    updateConnectionStatus('connected');
-                    console.log('✅ Supabase connected successfully');
-                } else {
-                    throw error;
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        // Table doesn't exist
+                        isConnected = false;
+                        updateConnectionStatus('error');
+                        showToast('error', 'Tables Missing', 'Please create the required database tables');
+                        console.error('❌ Database tables not found. Please run the SQL schema.');
+                        return;
+                    } else {
+                        throw error;
+                    }
                 }
+
+                isConnected = true;
+                updateConnectionStatus('connected');
+                console.log('✅ Supabase connected successfully');
+                showToast('success', 'Connected', 'Database connection successful');
             } catch (error) {
                 isConnected = false;
                 updateConnectionStatus('error');
                 console.error('❌ Supabase connection failed:', error);
-                showToast('error', 'Connection Failed', 'Check your Supabase configuration');
+                showToast('error', 'Connection Failed', error.message || 'Check your Supabase configuration');
             }
         }
 
@@ -907,13 +968,95 @@
                 form.addEventListener('submit', handleFormSubmit);
             }
 
-            // Auto-calculate calories from macros
-            ['protein', 'carbs', 'fat'].forEach(field => {
+            // Input change handlers with debouncing
+            ['calories', 'protein', 'carbs', 'fat'].forEach(field => {
                 const element = $(field);
                 if (element) {
-                    element.addEventListener('input', updateMacroCalculation);
+                    element.addEventListener('input', debounce(() => {
+                        updateMacroCalculation();
+                        triggerHaptic();
+
+                        // Clear favorite indicator if user manually changes values
+                        if (currentFavorite) {
+                            hideFavoriteIndicator();
+                        }
+                    }, 300));
                 }
             });
+
+            // Setup pull to refresh
+            setupPullToRefresh();
+
+            // Button haptic feedback
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('button, .btn, [onclick]')) {
+                    triggerHaptic();
+                }
+            });
+        }
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Haptic feedback
+        function triggerHaptic() {
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        }
+
+        // Setup pull to refresh
+        function setupPullToRefresh() {
+            let startY = 0;
+            let pullDistance = 0;
+            const container = document.querySelector('.container');
+            const pullIcon = $('pullToRefresh');
+
+            if (!container || !pullIcon) return;
+
+            container.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+            });
+
+            container.addEventListener('touchmove', (e) => {
+                if (window.scrollY === 0) {
+                    pullDistance = e.touches[0].clientY - startY;
+                    if (pullDistance > 0 && pullDistance < 80) {
+                        pullIcon.style.top = (pullDistance - 40) + 'px';
+                        pullIcon.style.opacity = pullDistance / 80;
+                    }
+                }
+            });
+
+            container.addEventListener('touchend', () => {
+                if (pullDistance > 50) {
+                    refreshData();
+                }
+                pullIcon.style.top = '-40px';
+                pullIcon.style.opacity = '0';
+                pullDistance = 0;
+            });
+        }
+
+        // Refresh data function
+        async function refreshData() {
+            showToast('info', 'Refreshing...', 'Reloading data from database');
+            await Promise.all([
+                loadTodaysTotals(),
+                loadTodaysEntries(),
+                loadFavorites()
+            ]);
+            showToast('success', 'Refreshed', 'Data updated from database');
         }
 
         // Handle form submission
@@ -1147,6 +1290,9 @@
             currentFavorite = favorite;
             updateMacroCalculation();
 
+            // Show favorite indicator
+            showFavoriteIndicator(favorite.name);
+
             // Update use count
             await supabase
                 .from('favorites')
@@ -1157,6 +1303,35 @@
                 .eq('id', favorite.id);
 
             showToast('success', 'Loaded', `"${favorite.name}" loaded into form`);
+        }
+
+        // Show favorite indicator
+        function showFavoriteIndicator(favoriteName) {
+            const indicator = $('favoriteIndicator');
+            indicator.innerHTML = `⭐ Loaded: "${favoriteName}"`;
+            indicator.classList.add('show');
+
+            // Clear existing timeout
+            if (favoriteIndicatorTimeout) {
+                clearTimeout(favoriteIndicatorTimeout);
+            }
+
+            // Auto-hide after 10 seconds if not submitted
+            favoriteIndicatorTimeout = setTimeout(() => {
+                hideFavoriteIndicator();
+            }, 10000);
+        }
+
+        // Hide favorite indicator
+        function hideFavoriteIndicator() {
+            const indicator = $('favoriteIndicator');
+            indicator.classList.remove('show');
+            currentFavorite = null;
+
+            if (favoriteIndicatorTimeout) {
+                clearTimeout(favoriteIndicatorTimeout);
+                favoriteIndicatorTimeout = null;
+            }
         }
 
         // Delete favorite
@@ -1392,17 +1567,31 @@
 
                 if (calories === 0) {
                     macroCalc.innerHTML = `Calculated: ${Math.round(calculatedCals)} calories`;
-                    $('calories').value = Math.round(calculatedCals);
+                    macroCalc.className = 'macro-calc';
+
+                    // Auto-fill calories if empty
+                    if (calculatedCals > 0) {
+                        $('calories').value = Math.round(calculatedCals);
+                    }
                 } else {
                     const diff = Math.abs(calories - calculatedCals);
-                    if (diff > calories * 0.2) {
+                    const threshold = calories * 0.2; // 20% threshold
+
+                    if (diff > threshold) {
                         macroCalc.innerHTML = `⚠️ Macros suggest ${Math.round(calculatedCals)} calories`;
+                        macroCalc.className = 'macro-calc macro-warning';
                     } else {
                         macroCalc.innerHTML = `✓ Macros match calories`;
+                        macroCalc.className = 'macro-calc';
                     }
                 }
             } else {
                 macroCalc.style.display = 'none';
+            }
+
+            // Clear favorite indicator if user manually changes values
+            if (currentFavorite) {
+                hideFavoriteIndicator();
             }
         }
 
@@ -1449,6 +1638,7 @@
             const btn = $('submitBtn');
             btn.classList.add('success');
             btn.innerHTML = '<span class="success-checkmark">✓</span>';
+            triggerHaptic(50);
 
             setTimeout(() => {
                 btn.innerHTML = 'Entry Logged!';
@@ -1467,6 +1657,13 @@
             setTimeout(() => {
                 $('undoBtn').classList.remove('show');
             }, 8000);
+
+            // Clear favorite indicator after submission
+            if (currentFavorite) {
+                setTimeout(() => {
+                    hideFavoriteIndicator();
+                }, 2000);
+            }
         }
 
         function updateConnectionStatus(status) {
@@ -1488,7 +1685,13 @@
             }
         }
 
-        function showToast(type, title, message) {
+        function showToast(type, title, message, duration = 3000) {
+            // Limit to 2 toasts
+            if (toastCount >= 2) {
+                return;
+            }
+
+            toastCount++;
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
 
@@ -1509,16 +1712,20 @@
 
             $('toastContainer').appendChild(toast);
 
-            setTimeout(() => {
+            // Trigger show animation
+            requestAnimationFrame(() => {
                 toast.classList.add('show');
-            }, 10);
+            });
 
             setTimeout(() => {
-                toast.classList.remove('show');
+                toast.style.animation = 'slideInRight 0.2s ease reverse';
                 setTimeout(() => {
-                    toast.remove();
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    toastCount--;
                 }, 200);
-            }, 3000);
+            }, duration);
         }
 
         function stepValue(field, amount) {
@@ -1576,6 +1783,61 @@
                 showToast('info', 'Cleared', 'All data deleted');
             } catch (error) {
                 showToast('error', 'Clear Failed', error.message);
+            }
+        }
+
+        window.createTables = async function() {
+            const sql = `
+                -- Create food_log table
+                CREATE TABLE IF NOT EXISTS food_log (
+                    id BIGSERIAL PRIMARY KEY,
+                    calories NUMERIC NOT NULL DEFAULT 0,
+                    protein NUMERIC NOT NULL DEFAULT 0,
+                    carbs NUMERIC NOT NULL DEFAULT 0,
+                    fat NUMERIC NOT NULL DEFAULT 0,
+                    meal_type TEXT NOT NULL,
+                    description TEXT,
+                    source TEXT DEFAULT 'Manual',
+                    favorite_name TEXT,
+                    client_id TEXT,
+                    date DATE NOT NULL DEFAULT CURRENT_DATE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+
+                -- Create favorites table
+                CREATE TABLE IF NOT EXISTS favorites (
+                    id BIGSERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    calories NUMERIC NOT NULL DEFAULT 0,
+                    protein NUMERIC NOT NULL DEFAULT 0,
+                    carbs NUMERIC NOT NULL DEFAULT 0,
+                    fat NUMERIC NOT NULL DEFAULT 0,
+                    meal_type TEXT NOT NULL,
+                    description TEXT,
+                    category TEXT,
+                    use_count INTEGER DEFAULT 0,
+                    last_used TIMESTAMPTZ,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+
+                -- Enable RLS
+                ALTER TABLE food_log ENABLE ROW LEVEL SECURITY;
+                ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
+
+                -- Create policies
+                CREATE POLICY "Allow all operations on food_log" ON food_log FOR ALL USING (true);
+                CREATE POLICY "Allow all operations on favorites" ON favorites FOR ALL USING (true);
+            `;
+
+            showToast('info', 'Creating Tables', 'Please run this SQL in your Supabase dashboard:');
+
+            // Copy to clipboard
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(sql);
+                showToast('success', 'SQL Copied', 'Paste this in your Supabase SQL editor and run it');
+            } else {
+                console.log('SQL to create tables:', sql);
+                showToast('info', 'SQL Available', 'Check browser console for SQL commands');
             }
         }
 
@@ -1646,3 +1908,6 @@
         window.deleteEntry = deleteEntry;
         window.reloadEntry = reloadEntry;
         window.undoLastEntry = undoLastEntry;
+    </script>
+</body>
+</html>
