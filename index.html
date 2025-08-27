@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0a0a">
     <title>Nutrition Tracker</title>
+    
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         * {
@@ -90,16 +93,6 @@
         .sync-info {
             font-size: 10px;
             color: #666;
-        }
-
-        .unsynced-badge {
-            background: #ef4444;
-            color: white;
-            border-radius: 8px;
-            padding: 1px 5px;
-            font-size: 9px;
-            font-weight: 600;
-            margin-left: 4px;
         }
 
         .header {
@@ -318,23 +311,6 @@
             100% { transform: translate(-50%, -50%) scale(1); }
         }
 
-        .favorite-indicator {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 15px;
-            font-size: 12px;
-            color: #667eea;
-            text-align: center;
-            display: none;
-        }
-
-        .favorite-indicator.show {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-
         .apple-health-options {
             background: rgba(102, 126, 234, 0.05);
             border: 1px solid rgba(102, 126, 234, 0.2);
@@ -366,33 +342,9 @@
             background: rgba(102, 126, 234, 0.15);
         }
 
-        .apple-health-btn.secondary {
-            background: rgba(102, 126, 234, 0.08);
-        }
-
         .apple-health-btn:active {
             background: rgba(102, 126, 234, 0.25);
             transform: scale(0.98);
-        }
-
-        .health-instructions {
-            font-size: 11px;
-            color: #a0a0a0;
-            text-align: center;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .debug-data {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            font-family: monospace;
-            font-size: 10px;
-            color: #fbbf24;
-            display: none;
         }
 
         .undo-btn {
@@ -415,11 +367,6 @@
             animation: slideIn 0.3s ease;
         }
 
-        .undo-btn:active {
-            background: rgba(239, 68, 68, 0.2);
-            transform: scale(0.98);
-        }
-
         @keyframes slideIn {
             from { transform: translateY(-10px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -429,32 +376,6 @@
             margin-bottom: 20px;
         }
 
-        .favorites-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .favorites-filter {
-            flex: 1;
-            background: #2a2a2a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px;
-            color: #ffffff;
-            font-size: 14px;
-        }
-
-        .favorites-search {
-            flex: 2;
-            background: #2a2a2a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px;
-            color: #ffffff;
-            font-size: 14px;
-        }
-
         .favorites-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -462,14 +383,6 @@
             margin-bottom: 10px;
             max-height: 400px;
             overflow-y: auto;
-        }
-
-        .favorites-empty {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: #a0a0a0;
-            padding: 30px;
-            font-size: 13px;
         }
 
         .favorite-btn {
@@ -507,12 +420,6 @@
             line-height: 1.2;
         }
 
-        .favorite-category {
-            font-size: 9px;
-            color: #667eea;
-            margin-top: 3px;
-        }
-
         .delete-favorite {
             position: absolute;
             top: 4px;
@@ -546,36 +453,6 @@
             cursor: pointer;
             transition: all 0.2s ease;
             margin-bottom: 15px;
-        }
-
-        .add-favorite-btn:active {
-            background: rgba(102, 126, 234, 0.2);
-            transform: scale(0.98);
-        }
-
-        .quick-add-section {
-            margin-top: 12px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .quick-add-btn {
-            flex: 1;
-            background: rgba(102, 126, 234, 0.2);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 8px;
-            color: #667eea;
-            font-size: 12px;
-            font-weight: 500;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 36px;
-        }
-
-        .quick-add-btn:active {
-            background: rgba(102, 126, 234, 0.3);
-            transform: scale(0.95);
         }
 
         .history-section {
@@ -651,26 +528,6 @@
             opacity: 1;
         }
 
-        .history-reload {
-            position: absolute;
-            right: 60px;
-            top: 8px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 4px 8px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .history-item:hover .history-reload {
-            opacity: 1;
-        }
-
         /* Toast Notifications */
         .toast-container {
             position: fixed;
@@ -714,16 +571,8 @@
             border-left: 3px solid #ef4444;
         }
 
-        .toast.warning {
-            border-left: 3px solid #fbbf24;
-        }
-
         .toast-icon {
             font-size: 16px;
-        }
-
-        .toast-content {
-            flex: 1;
         }
 
         .toast-title {
@@ -732,31 +581,10 @@
             font-size: 14px;
         }
 
-        .toast-message {
-            font-size: 12px;
-            color: #a0a0a0;
-        }
-
-        /* Macro Calculation Display */
-        .macro-calc {
-            font-size: 11px;
-            color: #a0a0a0;
-            text-align: center;
-            margin-top: 8px;
-            padding: 8px;
-            background: rgba(102, 126, 234, 0.05);
-            border-radius: 8px;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-        }
-
-        .macro-warning {
-            color: #fbbf24;
-        }
-
-        /* Settings/Test Panel */
+        /* Test Panel */
         .test-panel {
             position: fixed;
-            bottom: -200px;
+            bottom: -250px;
             left: 0;
             right: 0;
             background: #1a1a1a;
@@ -782,6 +610,17 @@
             margin-bottom: 8px;
         }
 
+        .macro-calc {
+            font-size: 11px;
+            color: #a0a0a0;
+            text-align: center;
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
         .nutrition-description {
             grid-column: 1 / -1;
         }
@@ -791,32 +630,10 @@
                 padding: env(safe-area-inset-top, 10px) 12px env(safe-area-inset-bottom, 10px);
             }
 
-            .app-title {
-                font-size: 24px;
-            }
-
-            .card {
-                padding: 12px;
-            }
-
             .toast-container {
                 left: 12px;
                 right: 12px;
             }
-
-            .form-input {
-                font-size: 16px; /* Prevent zoom on iOS */
-            }
-        }
-
-        .pull-to-refresh {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 20px;
-            opacity: 0;
-            transition: all 0.2s ease;
         }
     </style>
 </head>
@@ -825,10 +642,9 @@
     <div class="status-bar">
         <div class="connection-status" onclick="toggleTestPanel()">
             <span class="status-dot" id="statusDot"></span>
-            <span id="statusText">Checking...</span>
-            <span class="unsynced-badge" id="unsyncedBadge" style="display: none;">0</span>
+            <span id="statusText">Connecting...</span>
         </div>
-        <div class="sync-info" id="syncInfo">Never synced</div>
+        <div class="sync-info" id="syncInfo">Real-time sync</div>
     </div>
 
     <!-- Toast Container -->
@@ -836,18 +652,18 @@
 
     <!-- Test Panel -->
     <div class="test-panel" id="testPanel">
-        <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #fbbf24;">⚙️ Connection Test</div>
-        <button class="test-btn" onclick="testAPIConnection()">Test Google Sheets</button>
-        <button class="test-btn" onclick="forceSync()">Force Sync</button>
-        <button class="test-btn" onclick="clearAllData()">Clear Data</button>
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #667eea;">⚙️ Database Controls</div>
+        <button class="test-btn" onclick="testConnection()">Test Supabase</button>
+        <button class="test-btn" onclick="exportData()">Export Data</button>
+        <button class="test-btn" onclick="clearAllData()">Clear All Data</button>
+        <button class="test-btn" onclick="migrateFromLocalStorage()">Import from Old System</button>
         <button class="test-btn" onclick="toggleTestPanel()">Close</button>
+        <div id="debugInfo" style="margin-top: 10px; font-size: 11px; color: #a0a0a0;"></div>
     </div>
-
-    <div class="pull-to-refresh" id="pullToRefresh">↓</div>
 
     <div class="container">
         <div class="header">
-            <h1 class="app-title" id="appTitle">Nutrition Tracker</h1>
+            <h1 class="app-title" onclick="toggleTestPanel()">Nutrition Tracker</h1>
             <div class="date-display" id="dateDisplay"></div>
         </div>
 
@@ -887,9 +703,6 @@
         <div class="form-section">
             <h2 class="section-title">Add Entry</h2>
             <div class="card">
-                <!-- Favorite Indicator -->
-                <div class="favorite-indicator" id="favoriteIndicator"></div>
-
                 <form id="nutritionForm">
                     <div class="form-row">
                         <div class="form-group">
@@ -957,26 +770,13 @@
 
                     <button type="submit" class="submit-btn" id="submitBtn">Log Entry</button>
 
-                    <!-- Apple Health Options (iOS only) -->
+                    <!-- Apple Health Options -->
                     <div class="apple-health-options" id="appleHealthOptions">
-                        <p class="health-instructions">Choose method to log to Apple Health:</p>
-
-                        <button type="button" class="apple-health-btn primary" onclick="logToAppleHealthSimple()">
-                            📱 Direct Log to Health
-                        </button>
-
-                        <button type="button" class="apple-health-btn secondary" onclick="copyForAppleHealth()">
-                            📋 Copy & Open Shortcuts
-                        </button>
-
-                        <p style="font-size: 11px; color: #666; margin-top: 8px; text-align: center; line-height: 1.3;">
-                            If direct log doesn't work, use copy method and paste when Shortcuts asks for input
+                        <p style="font-size: 12px; color: #a0a0a0; margin-bottom: 10px; text-align: center;">
+                            Log to Apple Health:
                         </p>
-
-                        <div class="debug-data" id="debugData"></div>
-
-                        <button type="button" style="background: none; border: none; color: #666; font-size: 10px; width: 100%; margin-top: 5px;" onclick="showAppleHealthDebug()">
-                            Show Debug Info
+                        <button type="button" class="apple-health-btn primary" onclick="logToAppleHealth()">
+                            📱 Send to Apple Health
                         </button>
                     </div>
 
@@ -986,7 +786,7 @@
                     </button>
 
                     <!-- Save as Favorite Button -->
-                    <button type="button" class="add-favorite-btn" id="addFavoriteBtn" onclick="showAddFavorite()">
+                    <button type="button" class="add-favorite-btn" id="addFavoriteBtn" onclick="saveAsFavorite()">
                         ⭐ Save as Favorite
                     </button>
                 </form>
@@ -995,40 +795,28 @@
 
         <div class="favorites-section">
             <h2 class="section-title">Favorites</h2>
-            
-            <div class="favorites-controls">
-                <select class="favorites-filter" id="favoritesFilter" onchange="filterFavorites()">
-                    <option value="all">All Categories</option>
-                    <option value="Breakfast">Breakfast</option>
-                    <option value="Lunch">Lunch</option>
-                    <option value="Dinner">Dinner</option>
-                    <option value="Snack">Snack</option>
-                    <option value="Protein Shake">Protein Shake</option>
-                </select>
-                <input type="text" class="favorites-search" id="favoritesSearch" placeholder="Search favorites..." oninput="searchFavorites()">
-            </div>
-            
             <div class="favorites-grid" id="favoritesGrid">
-                <!-- Favorites will be added dynamically -->
-            </div>
-
-            <div class="quick-add-section">
-                <button class="quick-add-btn" onclick="quickAdd('calories', 100)">+100 Cal</button>
-                <button class="quick-add-btn" onclick="quickAdd('protein', 10)">+10g Pro</button>
+                <!-- Favorites will be loaded here -->
             </div>
         </div>
 
         <div class="history-section">
             <h2 class="section-title">Today's Entries</h2>
             <div id="historyContainer">
-                <!-- Entries will be populated by JavaScript -->
+                <!-- History will be loaded here -->
             </div>
         </div>
     </div>
 
     <script>
-        // API Configuration - PASTE YOUR GOOGLE APPS SCRIPT URL HERE
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzZCRtQwUBAT76gBkM5uPlbK4cIabcorNSKk6p1P2HzSr_3AWlegpLiAW_rRUhaL9MvPA/exec';
+        // ============================================
+        // SUPABASE CONFIGURATION - REPLACE THESE!
+        // ============================================
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'; // Replace with your URL
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'; // Replace with your anon key
+
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Configuration
         const DAILY_GOALS = {
@@ -1041,210 +829,126 @@
         // Global state
         let dailyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
         let todaysEntries = [];
-        let allEntries = [];
-        let unsyncedQueue = [];
-        let favoritesArray = [];
-        let filteredFavorites = [];
-        let isOnline = navigator.onLine;
-        let apiConnected = false;
-        let lastSyncTime = null;
+        let favorites = [];
         let lastEntry = null;
-        let toastCount = 0;
-        let inputDebounceTimer = null;
-        let currentlyLoadedFavorite = null;
-        let favoriteIndicatorTimeout = null;
+        let currentFavorite = null;
+        let isConnected = false;
 
-        // DOM elements - Initialize as let, will be assigned after DOM loads
-        let form;
-        let submitBtn;
-        let historyContainer;
-        let dateDisplay;
-        let appleHealthOptions;
-        let favoriteIndicator;
-        let undoBtn;
-        let addFavoriteBtn;
-        let testPanel;
-
-        // Cached DOM queries
-        const domCache = {};
-        function $(id) {
-            if (!domCache[id]) {
-                domCache[id] = document.getElementById(id);
-            }
-            return domCache[id];
-        }
+        // DOM elements
+        const $ = (id) => document.getElementById(id);
 
         // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Initializing Nutrition Tracker with Supabase...');
             
-            // Assign DOM elements after DOM is loaded
-            form = document.getElementById('nutritionForm');
-            submitBtn = document.getElementById('submitBtn');
-            historyContainer = document.getElementById('historyContainer');
-            dateDisplay = document.getElementById('dateDisplay');
-            appleHealthOptions = document.getElementById('appleHealthOptions');
-            favoriteIndicator = document.getElementById('favoriteIndicator');
-            undoBtn = document.getElementById('undoBtn');
-            addFavoriteBtn = document.getElementById('addFavoriteBtn');
-            testPanel = document.getElementById('testPanel');
+            // Check Supabase connection
+            await testSupabaseConnection();
             
-            // Verify critical elements exist
-            if (!form) console.error('Form not found!');
-            if (!addFavoriteBtn) console.error('Add favorite button not found!');
+            // Load initial data
+            await Promise.all([
+                loadTodaysTotals(),
+                loadTodaysEntries(),
+                loadFavorites()
+            ]);
             
-            initializeApp();
-            setupEventListeners();
+            // Setup UI
             updateDateDisplay();
-            loadTodaysData();
-            loadFavorites();
-            loadUnsyncedQueue();
-            checkAPIConnection();
-            startAutoSync();
-
+            setupEventListeners();
+            
+            // Setup real-time subscriptions
+            setupRealtimeSubscriptions();
+            
             if (isIOS()) {
                 document.body.classList.add('ios');
             }
         });
 
-        function initializeApp() {
-            // Prevent zoom on input focus (iOS)
-            const viewport = document.querySelector('meta[name="viewport"]');
-
-            document.querySelectorAll('input, select, textarea').forEach(input => {
-                input.addEventListener('focus', () => {
-                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
-                });
-
-                input.addEventListener('blur', () => {
-                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
-                });
-            });
-
-            // Update sync info
-            const lastSync = localStorage.getItem('lastSyncTime');
-            if (lastSync) {
-                lastSyncTime = new Date(lastSync);
-                updateSyncInfo();
+        // Test Supabase connection
+        async function testSupabaseConnection() {
+            try {
+                const { data, error } = await supabase
+                    .from('food_log')
+                    .select('count')
+                    .limit(1);
+                
+                if (!error) {
+                    isConnected = true;
+                    updateConnectionStatus('connected');
+                    console.log('✅ Supabase connected successfully');
+                } else {
+                    throw error;
+                }
+            } catch (error) {
+                isConnected = false;
+                updateConnectionStatus('error');
+                console.error('❌ Supabase connection failed:', error);
+                showToast('error', 'Connection Failed', 'Check your Supabase configuration');
             }
         }
 
+        // Setup event listeners
         function setupEventListeners() {
             // Form submission
+            const form = $('nutritionForm');
             if (form) {
                 form.addEventListener('submit', handleFormSubmit);
             }
 
-            // Input change handlers with debouncing
-            ['calories', 'protein', 'carbs', 'fat'].forEach(field => {
+            // Auto-calculate calories from macros
+            ['protein', 'carbs', 'fat'].forEach(field => {
                 const element = $(field);
                 if (element) {
-                    element.addEventListener('input', debounce(() => {
-                        updateMacroCalculation();
-                        triggerHaptic();
-
-                        // Clear favorite indicator if user manually changes values
-                        if (currentlyLoadedFavorite) {
-                            hideFavoriteIndicator();
-                        }
-                    }, 300));
-                }
-            });
-
-            // Online/offline detection
-            window.addEventListener('online', () => {
-                isOnline = true;
-                checkAPIConnection();
-                processUnsyncedQueue();
-            });
-
-            window.addEventListener('offline', () => {
-                isOnline = false;
-                updateConnectionStatus('offline');
-            });
-
-            // Pull to refresh
-            setupPullToRefresh();
-
-            // Button haptic feedback
-            document.addEventListener('click', (e) => {
-                if (e.target.matches('button, .btn, [onclick]')) {
-                    triggerHaptic();
+                    element.addEventListener('input', updateMacroCalculation);
                 }
             });
         }
 
-        function debounce(func, wait) {
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(inputDebounceTimer);
-                    func(...args);
-                };
-                clearTimeout(inputDebounceTimer);
-                inputDebounceTimer = setTimeout(later, wait);
-            };
-        }
-
-        function isIOS() {
-            return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        }
-
-        function triggerHaptic() {
-            if (navigator.vibrate) {
-                navigator.vibrate(10);
-            }
-        }
-
+        // Handle form submission
         async function handleFormSubmit(e) {
             e.preventDefault();
 
-            if (!validateForm()) {
-                return;
-            }
+            if (!validateForm()) return;
 
             const formData = getFormData();
+            const submitBtn = $('submitBtn');
 
             // Show loading state
             submitBtn.disabled = true;
             submitBtn.textContent = 'Saving...';
 
             try {
-                // Save locally first
-                addEntryToLocal(formData);
-                lastEntry = { ...formData };
+                // Insert into Supabase
+                const { data, error } = await supabase
+                    .from('food_log')
+                    .insert([formData])
+                    .select()
+                    .single();
 
-                // Try to sync with server
-                if (isOnline && apiConnected) {
-                    try {
-                        await submitToServer(formData);
-                        showToast('success', 'Synced!', 'Entry saved and synced to cloud');
-                    } catch (error) {
-                        addToUnsyncedQueue(formData);
-                        showToast('warning', 'Saved Locally', 'Will sync when online');
-                    }
-                } else {
-                    addToUnsyncedQueue(formData);
-                    showToast('info', 'Saved Offline', 'Will sync when connection restored');
-                }
+                if (error) throw error;
 
-                // Success animation
+                lastEntry = data;
+                
+                // Show success animation
                 showSuccessAnimation();
-
-                // Update UI
-                updateTotalsDisplay();
-                updateHistoryDisplay();
-
+                
+                // Reload data (real-time will also update)
+                await loadTodaysTotals();
+                await loadTodaysEntries();
+                
                 // Show action buttons
-                showPostSubmitButtons(formData);
-
-                // Clear form with delay
+                showPostSubmitButtons();
+                
+                showToast('success', 'Entry Logged!', 'Saved to database');
+                
+                // Clear form
                 setTimeout(() => {
-                    clearForm();
+                    $('nutritionForm').reset();
+                    $('macroCalc').style.display = 'none';
                 }, 1500);
 
             } catch (error) {
-                showToast('error', 'Save Failed', 'Could not save entry');
+                console.error('Save error:', error);
+                showToast('error', 'Save Failed', error.message);
             } finally {
                 setTimeout(() => {
                     submitBtn.disabled = false;
@@ -1254,821 +958,329 @@
             }
         }
 
-        function showSuccessAnimation() {
-            submitBtn.classList.add('success');
-            submitBtn.innerHTML = '<span class="success-checkmark">✓</span>';
-            triggerHaptic(50);
-
-            setTimeout(() => {
-                submitBtn.innerHTML = 'Entry Logged!';
-            }, 500);
-        }
-
-        function showPostSubmitButtons(formData) {
-            // Show Apple Health options on iOS
-            if (isIOS()) {
-                appleHealthOptions.classList.add('show');
-                setTimeout(() => {
-                    appleHealthOptions.classList.remove('show');
-                }, 12000);
-            }
-
-            // Show undo button
-            undoBtn.classList.add('show');
-            setTimeout(() => {
-                undoBtn.classList.remove('show');
-            }, 8000);
-
-            // Clear favorite indicator after submission
-            if (currentlyLoadedFavorite) {
-                setTimeout(() => {
-                    hideFavoriteIndicator();
-                }, 2000);
-            }
-        }
-
-        function validateForm() {
-            const calories = parseFloat($('calories').value) || 0;
-            const protein = parseFloat($('protein').value) || 0;
-            const carbs = parseFloat($('carbs').value) || 0;
-            const fat = parseFloat($('fat').value) || 0;
-
-            if (calories < 0 || calories > 5000) {
-                showToast('error', 'Invalid Input', 'Calories must be 0-5000');
-                return false;
-            }
-
-            if (protein < 0 || protein > 500) {
-                showToast('error', 'Invalid Input', 'Protein must be 0-500g');
-                return false;
-            }
-
-            if (carbs < 0 || carbs > 500) {
-                showToast('error', 'Invalid Input', 'Carbs must be 0-500g');
-                return false;
-            }
-
-            if (fat < 0 || fat > 500) {
-                showToast('error', 'Invalid Input', 'Fat must be 0-500g');
-                return false;
-            }
-
-            if (calories === 0 && protein === 0 && carbs === 0 && fat === 0) {
-                showToast('error', 'Empty Entry', 'Please enter at least one value');
-                return false;
-            }
-
-            return true;
-        }
-
+        // Get form data
         function getFormData() {
             const data = {
                 calories: parseFloat($('calories').value) || 0,
                 protein: parseFloat($('protein').value) || 0,
                 carbs: parseFloat($('carbs').value) || 0,
                 fat: parseFloat($('fat').value) || 0,
-                mealType: $('mealType').value,
+                meal_type: $('mealType').value,
                 description: $('description').value.trim(),
-                timestamp: new Date().toISOString(),
-                date: new Date().toDateString(),
-                id: Date.now().toString()
+                source: currentFavorite ? 'Favorite' : 'Manual',
+                favorite_name: currentFavorite ? currentFavorite.name : null,
+                client_id: getClientId()
             };
-
-            // Add source tracking for Google Sheets
-            if (currentlyLoadedFavorite) {
-                data.source = 'Favorite';
-                data.favoriteName = currentlyLoadedFavorite.name;
-            } else {
-                data.source = 'Manual';
-                data.favoriteName = '';
-            }
-
             return data;
         }
 
-        async function submitToServer(data) {
-            if (API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                throw new Error('API not configured');
+        // Get or create client ID
+        function getClientId() {
+            let clientId = localStorage.getItem('clientId');
+            if (!clientId) {
+                clientId = 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('clientId', clientId);
             }
-
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                    },
-                    body: JSON.stringify(data),
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                lastSyncTime = new Date();
-                localStorage.setItem('lastSyncTime', lastSyncTime.toISOString());
-                updateSyncInfo();
-
-                return { success: true };
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    throw new Error('Request timeout');
-                }
-                throw error;
-            }
+            return clientId;
         }
 
-        function updateMacroCalculation() {
-            const protein = parseFloat($('protein').value) || 0;
-            const carbs = parseFloat($('carbs').value) || 0;
-            const fat = parseFloat($('fat').value) || 0;
-            const calories = parseFloat($('calories').value) || 0;
-
-            const calculatedCals = (protein * 4) + (carbs * 4) + (fat * 9);
-            const macroCalc = $('macroCalc');
-
-            if (protein || carbs || fat) {
-                macroCalc.style.display = 'block';
-
-                if (calories === 0) {
-                    macroCalc.innerHTML = `Calculated: ${Math.round(calculatedCals)} calories`;
-                    macroCalc.className = 'macro-calc';
-
-                    // Auto-fill calories if empty
-                    if (calculatedCals > 0) {
-                        $('calories').value = Math.round(calculatedCals);
-                    }
-                } else {
-                    const diff = Math.abs(calories - calculatedCals);
-                    const threshold = calories * 0.2; // 20% threshold
-
-                    if (diff > threshold) {
-                        macroCalc.innerHTML = `⚠️ Macros suggest ${Math.round(calculatedCals)} calories`;
-                        macroCalc.className = 'macro-calc macro-warning';
-                    } else {
-                        macroCalc.innerHTML = `✓ Macros match calories`;
-                        macroCalc.className = 'macro-calc';
-                    }
-                }
-            } else {
-                macroCalc.style.display = 'none';
-            }
-        }
-
-        function stepValue(fieldId, amount) {
-            const input = $(fieldId);
-            const currentValue = parseFloat(input.value) || 0;
-            const newValue = Math.max(0, currentValue + amount);
-            input.value = newValue;
-            updateMacroCalculation();
-        }
-
-        function quickAdd(field, amount) {
-            const input = $(field);
-            const currentValue = parseFloat(input.value) || 0;
-            input.value = currentValue + amount;
-            updateMacroCalculation();
-        }
-
-        // APPLE HEALTH INTEGRATION - FIXED TO USE JSON FORMAT
-        function logToAppleHealthSimple() {
-            if (!lastEntry && !getCurrentFormData()) {
-                showToast('error', 'No Data', 'Please submit an entry first');
-                return;
-            }
-
-            const data = lastEntry || getCurrentFormData();
-
-            // Create JSON dictionary format that Shortcuts expects
-            const jsonData = JSON.stringify({
-                calories: data.calories,
-                protein: data.protein,
-                carbs: data.carbs,
-                fat: data.fat
-            });
-
-            // Try with x-callback-url format
-            const url = `shortcuts://x-callback-url/run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(jsonData)}`;
-
-            console.log('Sending to Shortcuts:', jsonData);
-            window.location.href = url;
-
-            // Show instructions
-            setTimeout(() => {
-                showToast('info', 'Check Apple Health', 'If data didn\'t log, try the Copy method instead');
-            }, 2000);
-        }
-
-        function copyForAppleHealth() {
-            if (!lastEntry && !getCurrentFormData()) {
-                showToast('error', 'No Data', 'Please submit an entry first');
-                return;
-            }
-
-            const data = lastEntry || getCurrentFormData();
-
-            // Format as JSON dictionary that the shortcut expects
-            const jsonData = JSON.stringify({
-                calories: data.calories,
-                protein: data.protein,
-                carbs: data.carbs,
-                fat: data.fat
-            });
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(jsonData).then(() => {
-                    showToast('success', 'Copied!', 'Open Shortcuts app → Run "Log Nutrition" → Paste the data');
-                    console.log('Copied to clipboard:', jsonData);
-
-                    // Try to open Shortcuts app
-                    setTimeout(() => {
-                        window.location.href = 'shortcuts://';
-                    }, 1000);
-                }).catch(() => {
-                    fallbackCopy(jsonData);
-                });
-            } else {
-                fallbackCopy(jsonData);
-            }
-        }
-
-        function fallbackCopy(text) {
-            // Fallback for older browsers
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.opacity = '0';
-            document.body.appendChild(textArea);
-            textArea.select();
-
-            try {
-                document.execCommand('copy');
-                showToast('success', 'Copied!', 'Open Shortcuts and paste: ' + text);
-            } catch (err) {
-                showToast('error', 'Copy Failed', 'Manually copy: ' + text);
-            }
-
-            document.body.removeChild(textArea);
-        }
-
-        function showAppleHealthDebug() {
-            const data = lastEntry || getCurrentFormData();
-            if (!data) {
-                showToast('error', 'No Data', 'Submit an entry first');
-                return;
-            }
-
-            const debugData = $('debugData');
-            
-            // Show both formats for debugging
-            const jsonFormat = JSON.stringify({
-                calories: data.calories,
-                protein: data.protein,
-                carbs: data.carbs,
-                fat: data.fat
-            });
-            
-            const csvFormat = `${data.calories},${data.protein},${data.carbs},${data.fat}`;
-            
-            debugData.innerHTML = `
-                <strong>Debug Data Formats:</strong><br>
-                <strong>JSON (Should Work):</strong><br>${jsonFormat}<br><br>
-                <strong>CSV (Old Format):</strong><br>${csvFormat}<br><br>
-                <strong>URL:</strong><br>shortcuts://run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(jsonFormat)}
-            `;
-
-            debugData.style.display = 'block';
-
-            // Hide after 10 seconds
-            setTimeout(() => {
-                debugData.style.display = 'none';
-            }, 10000);
-        }
-
-        function getCurrentFormData() {
+        // Validate form
+        function validateForm() {
             const calories = parseFloat($('calories').value) || 0;
             const protein = parseFloat($('protein').value) || 0;
             const carbs = parseFloat($('carbs').value) || 0;
             const fat = parseFloat($('fat').value) || 0;
 
-            if (calories || protein || carbs || fat) {
-                return {
-                    calories,
-                    protein,
-                    carbs,
-                    fat,
-                    mealType: $('mealType').value
+            if (calories === 0 && protein === 0 && carbs === 0 && fat === 0) {
+                showToast('error', 'Empty Entry', 'Please enter at least one value');
+                return false;
+            }
+
+            if (calories < 0 || calories > 5000) {
+                showToast('error', 'Invalid Calories', 'Must be between 0-5000');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Load today's totals
+        async function loadTodaysTotals() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                const { data, error } = await supabase
+                    .from('food_log')
+                    .select('calories, protein, carbs, fat')
+                    .eq('date', today);
+
+                if (error) throw error;
+
+                // Calculate totals
+                dailyTotals = {
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0
                 };
-            }
-            return null;
-        }
 
-        function undoLastEntry() {
-            if (!lastEntry) {
-                showToast('error', 'Nothing to Undo', 'No recent entry found');
-                return;
-            }
+                data.forEach(entry => {
+                    dailyTotals.calories += parseFloat(entry.calories) || 0;
+                    dailyTotals.protein += parseFloat(entry.protein) || 0;
+                    dailyTotals.carbs += parseFloat(entry.carbs) || 0;
+                    dailyTotals.fat += parseFloat(entry.fat) || 0;
+                });
 
-            if (confirm('Undo last entry?')) {
-                // Remove from totals
-                dailyTotals.calories -= lastEntry.calories;
-                dailyTotals.protein -= lastEntry.protein;
-                dailyTotals.carbs -= lastEntry.carbs;
-                dailyTotals.fat -= lastEntry.fat;
-
-                // Remove from entries
-                todaysEntries = todaysEntries.filter(entry => entry.id !== lastEntry.id);
-
-                // Update localStorage
-                localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
-                localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
-
-                // Update displays
                 updateTotalsDisplay();
+            } catch (error) {
+                console.error('Error loading totals:', error);
+            }
+        }
+
+        // Load today's entries
+        async function loadTodaysEntries() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                const { data, error } = await supabase
+                    .from('food_log')
+                    .select('*')
+                    .eq('date', today)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+
+                todaysEntries = data;
                 updateHistoryDisplay();
-
-                showToast('info', 'Undone', 'Last entry removed');
-                lastEntry = null;
-                undoBtn.classList.remove('show');
+            } catch (error) {
+                console.error('Error loading entries:', error);
             }
         }
 
-        function showAddFavorite() {
-            // Check if there's data to save
-            const currentData = getCurrentFormData();
-            
-            if (!currentData) {
-                showToast('error', 'No Data', 'Please enter nutrition values first');
-                return;
-            }
-            
-            if (!currentData.description || !currentData.description.trim()) {
-                showToast('warning', 'Description Required', 'Please add a description to save as favorite');
-                return;
-            }
+        // Load favorites
+        async function loadFavorites() {
+            try {
+                const { data, error } = await supabase
+                    .from('favorites')
+                    .select('*')
+                    .order('use_count', { ascending: false });
 
-            // Use description as default name
-            const defaultName = currentData.description;
-            const name = prompt('Name this favorite:', defaultName);
-            
-            if (name && name.trim()) {
-                addToFavorites(name.trim(), currentData);
-                showToast('success', 'Favorite Saved', `"${name.trim()}" saved to favorites`);
+                if (error) throw error;
+
+                favorites = data;
+                displayFavorites();
+            } catch (error) {
+                console.error('Error loading favorites:', error);
             }
         }
 
-        function getCurrentFormData() {
+        // Save as favorite
+        async function saveAsFavorite() {
             const calories = parseFloat($('calories').value) || 0;
             const protein = parseFloat($('protein').value) || 0;
             const carbs = parseFloat($('carbs').value) || 0;
             const fat = parseFloat($('fat').value) || 0;
             const description = $('description').value.trim();
-            const mealType = $('mealType').value;
 
-            if (calories || protein || carbs || fat) {
-                return {
-                    calories,
-                    protein,
-                    carbs,
-                    fat,
-                    mealType,
-                    description
-                };
-            }
-            return null;
-        }
-
-        function addToFavorites(name, data) {
-            const favorite = {
-                id: Date.now().toString(),
-                name: name,
-                calories: data.calories,
-                protein: data.protein,
-                carbs: data.carbs,
-                fat: data.fat,
-                mealType: data.mealType,
-                description: data.description,
-                category: data.mealType, // Use meal type as category
-                useCount: 0,
-                lastUsed: null
-            };
-
-            favoritesArray.push(favorite);
-            saveFavoritesToStorage();
-            displayFavorites();
-            showToast('success', 'Favorite Saved', `"${name}" added to favorites`);
-        }
-
-        function saveFavoritesToStorage() {
-            localStorage.setItem('favorites', JSON.stringify(favoritesArray));
-            // Also sync to Google Sheets if online
-            if (isOnline && apiConnected) {
-                syncFavoritesToSheets();
-            }
-        }
-
-        function syncFavoritesToSheets() {
-            // This would sync favorites to Google Sheets Favorites tab
-            // Implementation would require adding endpoint to Apps Script
-            console.log('Favorites sync to sheets - future implementation');
-        }
-
-        function loadFavorites() {
-            const saved = localStorage.getItem('favorites');
-            if (saved) {
-                favoritesArray = JSON.parse(saved);
-                displayFavorites();
-            }
-        }
-
-        function displayFavorites() {
-            const grid = $('favoritesGrid');
-            if (!grid) return;
-            
-            // Get current filter and search
-            const filterValue = $('favoritesFilter')?.value || 'all';
-            const searchValue = $('favoritesSearch')?.value?.toLowerCase() || '';
-            
-            // Filter favorites based on category and search
-            filteredFavorites = favoritesArray.filter(fav => {
-                const matchesCategory = filterValue === 'all' || fav.category === filterValue;
-                const matchesSearch = !searchValue || 
-                    fav.name.toLowerCase().includes(searchValue) ||
-                    fav.description?.toLowerCase().includes(searchValue);
-                return matchesCategory && matchesSearch;
-            });
-
-            // Sort by use count and last used
-            filteredFavorites.sort((a, b) => {
-                // Prioritize recently used
-                if (a.lastUsed && b.lastUsed) {
-                    return new Date(b.lastUsed) - new Date(a.lastUsed);
-                }
-                return (b.useCount || 0) - (a.useCount || 0);
-            });
-
-            grid.innerHTML = '';
-
-            if (filteredFavorites.length === 0) {
-                grid.innerHTML = '<div class="favorites-empty">No favorites found. Save entries with descriptions to build your collection!</div>';
+            if (!calories && !protein && !carbs && !fat) {
+                showToast('error', 'No Data', 'Enter nutrition values first');
                 return;
             }
 
-            filteredFavorites.forEach(fav => {
+            const name = prompt('Name this favorite:', description || 'My Favorite');
+            if (!name) return;
+
+            try {
+                const { data, error } = await supabase
+                    .from('favorites')
+                    .insert([{
+                        name: name,
+                        calories: calories,
+                        protein: protein,
+                        carbs: carbs,
+                        fat: fat,
+                        meal_type: $('mealType').value,
+                        description: description,
+                        category: $('mealType').value
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                await loadFavorites();
+                showToast('success', 'Favorite Saved', `"${name}" added to favorites`);
+            } catch (error) {
+                console.error('Error saving favorite:', error);
+                showToast('error', 'Save Failed', error.message);
+            }
+        }
+
+        // Load favorite into form
+        async function loadFavorite(favoriteId) {
+            const favorite = favorites.find(f => f.id == favoriteId);
+            if (!favorite) return;
+
+            // Load values into form
+            $('calories').value = favorite.calories;
+            $('protein').value = favorite.protein;
+            $('carbs').value = favorite.carbs;
+            $('fat').value = favorite.fat;
+            $('mealType').value = favorite.meal_type;
+            $('description').value = favorite.description || '';
+
+            currentFavorite = favorite;
+            updateMacroCalculation();
+
+            // Update use count
+            await supabase
+                .from('favorites')
+                .update({ 
+                    use_count: (favorite.use_count || 0) + 1,
+                    last_used: new Date().toISOString()
+                })
+                .eq('id', favorite.id);
+
+            showToast('success', 'Loaded', `"${favorite.name}" loaded into form`);
+        }
+
+        // Delete favorite
+        async function deleteFavorite(favoriteId) {
+            if (!confirm('Delete this favorite?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('favorites')
+                    .delete()
+                    .eq('id', favoriteId);
+
+                if (error) throw error;
+
+                await loadFavorites();
+                showToast('info', 'Deleted', 'Favorite removed');
+            } catch (error) {
+                console.error('Error deleting favorite:', error);
+                showToast('error', 'Delete Failed', error.message);
+            }
+        }
+
+        // Display favorites
+        function displayFavorites() {
+            const grid = $('favoritesGrid');
+            grid.innerHTML = '';
+
+            if (favorites.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #a0a0a0; padding: 20px;">No favorites yet. Save entries to build your collection!</div>';
+                return;
+            }
+
+            favorites.forEach(fav => {
                 const btn = document.createElement('button');
                 btn.className = 'favorite-btn';
-                btn.dataset.favoriteId = fav.id;
                 btn.innerHTML = `
                     <div class="favorite-name">${fav.name}</div>
                     <div class="favorite-macros">${Math.round(fav.calories)}cal • ${Math.round(fav.protein)}p • ${Math.round(fav.carbs)}c • ${Math.round(fav.fat)}f</div>
-                    <div class="favorite-category">${fav.category || fav.mealType}</div>
-                    <button class="delete-favorite" data-favorite-id="${fav.id}" onclick="event.stopPropagation(); deleteFavorite('${fav.id}')">×</button>
+                    <button class="delete-favorite" onclick="event.stopPropagation(); deleteFavorite(${fav.id})">×</button>
                 `;
                 btn.onclick = () => loadFavorite(fav.id);
                 grid.appendChild(btn);
             });
         }
 
-        function filterFavorites() {
-            displayFavorites();
-        }
-
-        function searchFavorites() {
-            displayFavorites();
-        }
-
-        function getSuggestedMealType() {
-            const hour = new Date().getHours();
-            if (hour >= 5 && hour < 11) return 'Breakfast';
-            if (hour >= 11 && hour < 14) return 'Lunch';
-            if (hour >= 14 && hour < 17) return 'Snack';
-            if (hour >= 17 && hour < 21) return 'Dinner';
-            return 'Snack';
-        }
-
-        function loadFavorite(favoriteId) {
-            const favorite = favoritesArray.find(f => f.id === favoriteId);
-            if (favorite) {
-                // Load the favorite data into form
-                $('calories').value = favorite.calories;
-                $('protein').value = favorite.protein;
-                $('carbs').value = favorite.carbs;
-                $('fat').value = favorite.fat;
-                $('mealType').value = favorite.mealType;
-                $('description').value = favorite.description || '';
-                updateMacroCalculation();
-
-                // Update use count and last used
-                favorite.useCount = (favorite.useCount || 0) + 1;
-                favorite.lastUsed = new Date().toISOString();
-                saveFavoritesToStorage();
-
-                // Set currently loaded favorite for tracking
-                currentlyLoadedFavorite = favorite;
-
-                // Show favorite indicator
-                showFavoriteIndicator(favorite.name);
-
-                showToast('success', 'Favorite Loaded', `"${favorite.name}" loaded into form`);
-            }
-        }
-
-        function showFavoriteIndicator(favoriteName) {
-            favoriteIndicator.innerHTML = `⭐ Loaded: "${favoriteName}"`;
-            favoriteIndicator.classList.add('show');
-
-            // Clear existing timeout
-            if (favoriteIndicatorTimeout) {
-                clearTimeout(favoriteIndicatorTimeout);
-            }
-
-            // Auto-hide after 10 seconds if not submitted
-            favoriteIndicatorTimeout = setTimeout(() => {
-                hideFavoriteIndicator();
-            }, 10000);
-        }
-
-        function hideFavoriteIndicator() {
-            favoriteIndicator.classList.remove('show');
-            currentlyLoadedFavorite = null;
-
-            if (favoriteIndicatorTimeout) {
-                clearTimeout(favoriteIndicatorTimeout);
-                favoriteIndicatorTimeout = null;
-            }
-        }
-
-        function deleteFavorite(favoriteId) {
-            if (confirm('Delete this favorite?')) {
-                favoritesArray = favoritesArray.filter(f => f.id !== favoriteId);
-                localStorage.setItem('favorites', JSON.stringify(favoritesArray));
-                displayFavorites();
-                showToast('info', 'Deleted', 'Favorite removed');
-            }
-        }
-
-        function showToast(type, title, message, duration = 3000) {
-            // Limit to 2 toasts
-            if (toastCount >= 2) {
-                return;
-            }
-
-            toastCount++;
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-
-            const iconMap = {
-                'success': '✓',
-                'error': '✗',
-                'warning': '⚠',
-                'info': 'ℹ'
-            };
-
-            toast.innerHTML = `
-                <span class="toast-icon">${iconMap[type]}</span>
-                <div class="toast-content">
-                    <div class="toast-title">${title}</div>
-                    <div class="toast-message">${message}</div>
-                </div>
-            `;
-
-            $('toastContainer').appendChild(toast);
-
-            // Trigger show animation
-            requestAnimationFrame(() => {
-                toast.classList.add('show');
-            });
-
-            setTimeout(() => {
-                toast.style.animation = 'slideInRight 0.2s ease reverse';
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                    toastCount--;
-                }, 200);
-            }, duration);
-        }
-
-        // Rest of the functions (connection, sync, etc.) - same as before
-        async function checkAPIConnection() {
-            if (API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                updateConnectionStatus('not-configured');
-                return;
-            }
-
-            if (!isOnline) {
-                updateConnectionStatus('offline');
-                return;
-            }
+        // Delete entry
+        async function deleteEntry(entryId) {
+            if (!confirm('Delete this entry?')) return;
 
             try {
-                const controller = new AbortController();
-                setTimeout(() => controller.abort(), 3000);
+                const { error } = await supabase
+                    .from('food_log')
+                    .delete()
+                    .eq('id', entryId);
 
-                await fetch(API_URL, {
-                    method: 'GET',
-                    mode: 'no-cors',
-                    signal: controller.signal
-                });
+                if (error) throw error;
 
-                apiConnected = true;
-                updateConnectionStatus('connected');
+                await loadTodaysTotals();
+                await loadTodaysEntries();
+                showToast('info', 'Deleted', 'Entry removed');
             } catch (error) {
-                apiConnected = false;
-                updateConnectionStatus('error');
+                console.error('Error deleting entry:', error);
+                showToast('error', 'Delete Failed', error.message);
             }
         }
 
-        function updateConnectionStatus(status) {
-            const dot = $('statusDot');
-            const text = $('statusText');
+        // Reload entry into form
+        function reloadEntry(entryId) {
+            const entry = todaysEntries.find(e => e.id == entryId);
+            if (!entry) return;
 
-            switch(status) {
-                case 'connected':
-                    dot.className = 'status-dot connected';
-                    text.textContent = 'Connected';
-                    break;
-                case 'offline':
-                    dot.className = 'status-dot error';
-                    text.textContent = 'Offline';
-                    break;
-                case 'not-configured':
-                    dot.className = 'status-dot';
-                    text.textContent = 'Setup needed';
-                    showToast('warning', 'Setup Required', 'Configure Google Sheets URL');
-                    break;
-                case 'error':
-                    dot.className = 'status-dot error';
-                    text.textContent = 'Error';
-                    break;
+            $('calories').value = entry.calories;
+            $('protein').value = entry.protein;
+            $('carbs').value = entry.carbs;
+            $('fat').value = entry.fat;
+            $('mealType').value = entry.meal_type;
+            $('description').value = entry.description || '';
+
+            updateMacroCalculation();
+            $('nutritionForm').scrollIntoView({ behavior: 'smooth' });
+            showToast('info', 'Loaded', 'Previous entry loaded into form');
+        }
+
+        // Undo last entry
+        async function undoLastEntry() {
+            if (!lastEntry) {
+                showToast('error', 'Nothing to Undo', 'No recent entry found');
+                return;
             }
-            updateUnsyncedBadge();
-        }
 
-        function addEntryToLocal(entry) {
-            todaysEntries.unshift(entry);
-
-            dailyTotals.calories += entry.calories;
-            dailyTotals.protein += entry.protein;
-            dailyTotals.carbs += entry.carbs;
-            dailyTotals.fat += entry.fat;
-
-            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
-            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
-            localStorage.setItem('lastEntryDate', new Date().toDateString());
-        }
-
-        function addToUnsyncedQueue(entry) {
-            unsyncedQueue.push(entry);
-            localStorage.setItem('unsyncedQueue', JSON.stringify(unsyncedQueue));
-            updateUnsyncedBadge();
-        }
-
-        function updateUnsyncedBadge() {
-            const badge = $('unsyncedBadge');
-            if (unsyncedQueue.length > 0) {
-                badge.textContent = unsyncedQueue.length;
-                badge.style.display = 'inline-block';
-            } else {
-                badge.style.display = 'none';
+            if (confirm('Undo last entry?')) {
+                await deleteEntry(lastEntry.id);
+                lastEntry = null;
+                $('undoBtn').classList.remove('show');
             }
         }
 
-        function loadUnsyncedQueue() {
-            const saved = localStorage.getItem('unsyncedQueue');
-            if (saved) {
-                unsyncedQueue = JSON.parse(saved);
-                updateUnsyncedBadge();
-            }
-        }
-
-        async function processUnsyncedQueue() {
-            if (!unsyncedQueue.length || !isOnline || !apiConnected) return;
-
-            const queue = [...unsyncedQueue];
-            const failed = [];
-
-            for (const entry of queue) {
-                try {
-                    await submitToServer(entry);
-                    unsyncedQueue = unsyncedQueue.filter(e => e.id !== entry.id);
-                } catch (error) {
-                    failed.push(entry);
-                }
-            }
-
-            unsyncedQueue = failed;
-            localStorage.setItem('unsyncedQueue', JSON.stringify(unsyncedQueue));
-            updateUnsyncedBadge();
-
-            if (!failed.length && queue.length) {
-                showToast('success', 'Synced', `${queue.length} entries uploaded`);
-            }
-        }
-
-        function updateSyncInfo() {
-            const syncInfo = $('syncInfo');
-            if (lastSyncTime) {
-                const diff = Date.now() - lastSyncTime.getTime();
-                const minutes = Math.floor(diff / 60000);
-
-                if (minutes < 1) {
-                    syncInfo.textContent = 'Just synced';
-                } else if (minutes < 60) {
-                    syncInfo.textContent = `${minutes}m ago`;
-                } else {
-                    const hours = Math.floor(minutes / 60);
-                    syncInfo.textContent = `${hours}h ago`;
-                }
-            } else {
-                syncInfo.textContent = 'Never synced';
-            }
-        }
-
-        function startAutoSync() {
-            setInterval(() => {
-                if (unsyncedQueue.length && isOnline) {
-                    processUnsyncedQueue();
-                }
-                updateSyncInfo();
-            }, 30000);
-        }
-
-        function loadTodaysData() {
-            const lastDate = localStorage.getItem('lastEntryDate');
-            const today = new Date().toDateString();
-
-            if (lastDate === today) {
-                const savedEntries = localStorage.getItem('todaysEntries');
-                const savedTotals = localStorage.getItem('dailyTotals');
-
-                if (savedEntries) {
-                    todaysEntries = JSON.parse(savedEntries);
-                }
-
-                if (savedTotals) {
-                    dailyTotals = JSON.parse(savedTotals);
-                }
-            } else {
-                todaysEntries = [];
-                dailyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
-                localStorage.removeItem('todaysEntries');
-                localStorage.removeItem('dailyTotals');
-            }
-
-            updateTotalsDisplay();
-            updateHistoryDisplay();
-        }
-
+        // Update totals display
         function updateTotalsDisplay() {
-            animateValue('totalCalories', Math.round(dailyTotals.calories));
-            animateValue('totalProtein', Math.round(dailyTotals.protein) + 'g');
-            animateValue('totalCarbs', Math.round(dailyTotals.carbs) + 'g');
-            animateValue('totalFat', Math.round(dailyTotals.fat) + 'g');
+            $('totalCalories').textContent = Math.round(dailyTotals.calories);
+            $('totalProtein').textContent = Math.round(dailyTotals.protein) + 'g';
+            $('totalCarbs').textContent = Math.round(dailyTotals.carbs) + 'g';
+            $('totalFat').textContent = Math.round(dailyTotals.fat) + 'g';
 
+            // Update progress bars
             updateProgressBar('caloriesProgress', dailyTotals.calories, DAILY_GOALS.calories);
             updateProgressBar('proteinProgress', dailyTotals.protein, DAILY_GOALS.protein);
             updateProgressBar('carbsProgress', dailyTotals.carbs, DAILY_GOALS.carbs);
             updateProgressBar('fatProgress', dailyTotals.fat, DAILY_GOALS.fat);
         }
 
-        function animateValue(elementId, newValue) {
-            const element = $(elementId);
-            element.textContent = newValue;
-            element.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                element.style.transform = 'scale(1)';
-            }, 150);
-        }
-
+        // Update progress bar
         function updateProgressBar(elementId, current, goal) {
             const percentage = Math.min((current / goal) * 100, 100);
             $(elementId).style.width = percentage + '%';
         }
 
+        // Update history display
         function updateHistoryDisplay() {
-            const container = historyContainer;
+            const container = $('historyContainer');
             container.innerHTML = '';
 
             if (!todaysEntries.length) {
-                container.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 20px; font-size: 13px;">No entries today</p>';
+                container.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 20px;">No entries today</p>';
                 return;
             }
 
-            todaysEntries.slice(0, 10).forEach((entry, index) => {
+            todaysEntries.forEach(entry => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
                 div.innerHTML = `
                     <div class="history-header">
                         <div>
-                            <strong>${entry.mealType}</strong>
+                            <strong>${entry.meal_type}</strong>
                             ${entry.description ? `<div style="font-size: 11px; color: #a0a0a0; margin-top: 2px;">${entry.description}</div>` : ''}
-                            ${entry.source === 'Favorite' ? `<div style="font-size: 10px; color: #667eea; margin-top: 1px;">⭐ ${entry.favoriteName}</div>` : ''}
+                            ${entry.source === 'Favorite' ? `<div style="font-size: 10px; color: #667eea;">⭐ ${entry.favorite_name}</div>` : ''}
                         </div>
-                        <span class="history-time">${formatTime(entry.timestamp)}</span>
+                        <span class="history-time">${formatTime(entry.created_at)}</span>
                     </div>
                     <div class="history-details">
                         <div class="history-macro">
@@ -2088,14 +1300,12 @@
                             <div class="history-macro-label">Fat</div>
                         </div>
                     </div>
-                    <button class="history-reload" onclick="reloadEntry(${index})">Reload</button>
-                    <button class="history-delete" onclick="deleteEntry(${index})">Delete</button>
+                    <button class="history-delete" onclick="deleteEntry(${entry.id})">Delete</button>
                 `;
                 
-                // Add click to reload functionality (click anywhere except buttons)
                 div.addEventListener('click', (e) => {
-                    if (!e.target.closest('.history-delete') && !e.target.closest('.history-reload')) {
-                        reloadEntry(index);
+                    if (!e.target.closest('.history-delete')) {
+                        reloadEntry(entry.id);
                     }
                 });
                 
@@ -2103,169 +1313,296 @@
             });
         }
 
-        function reloadEntry(index) {
-            const entry = todaysEntries[index];
-            if (entry) {
-                // Load entry data into form
-                $('calories').value = entry.calories;
-                $('protein').value = entry.protein;
-                $('carbs').value = entry.carbs;
-                $('fat').value = entry.fat;
-                $('mealType').value = entry.mealType;
-                $('description').value = entry.description || '';
-                updateMacroCalculation();
+        // Setup real-time subscriptions
+        function setupRealtimeSubscriptions() {
+            // Subscribe to changes in food_log table
+            supabase
+                .channel('food_log_changes')
+                .on('postgres_changes', 
+                    { event: '*', schema: 'public', table: 'food_log' }, 
+                    async (payload) => {
+                        console.log('Real-time update:', payload);
+                        
+                        // Reload data when changes occur
+                        await loadTodaysTotals();
+                        await loadTodaysEntries();
+                    }
+                )
+                .subscribe();
 
-                showToast('info', 'Entry Reloaded', 'Previous entry loaded into form');
-                
-                // Scroll to form
-                $('nutritionForm').scrollIntoView({ behavior: 'smooth' });
+            // Subscribe to favorites changes
+            supabase
+                .channel('favorites_changes')
+                .on('postgres_changes',
+                    { event: '*', schema: 'public', table: 'favorites' },
+                    async (payload) => {
+                        await loadFavorites();
+                    }
+                )
+                .subscribe();
+        }
+
+        // Update macro calculation
+        function updateMacroCalculation() {
+            const protein = parseFloat($('protein').value) || 0;
+            const carbs = parseFloat($('carbs').value) || 0;
+            const fat = parseFloat($('fat').value) || 0;
+            const calories = parseFloat($('calories').value) || 0;
+
+            const calculatedCals = (protein * 4) + (carbs * 4) + (fat * 9);
+            const macroCalc = $('macroCalc');
+
+            if (protein || carbs || fat) {
+                macroCalc.style.display = 'block';
+
+                if (calories === 0) {
+                    macroCalc.innerHTML = `Calculated: ${Math.round(calculatedCals)} calories`;
+                    $('calories').value = Math.round(calculatedCals);
+                } else {
+                    const diff = Math.abs(calories - calculatedCals);
+                    if (diff > calories * 0.2) {
+                        macroCalc.innerHTML = `⚠️ Macros suggest ${Math.round(calculatedCals)} calories`;
+                    } else {
+                        macroCalc.innerHTML = `✓ Macros match calories`;
+                    }
+                }
+            } else {
+                macroCalc.style.display = 'none';
             }
         }
 
-        async function deleteEntry(index) {
-            const entry = todaysEntries[index];
-            
-            if (!confirm(`Delete this ${entry.mealType} entry?\n\nNote: Entry will be removed from tracker but cannot be deleted from Apple Health.`)) {
+        // Apple Health integration
+        function logToAppleHealth() {
+            if (!lastEntry) {
+                showToast('error', 'No Entry', 'Submit an entry first');
                 return;
             }
 
-            // Remove from totals
-            dailyTotals.calories -= entry.calories;
-            dailyTotals.protein -= entry.protein;
-            dailyTotals.carbs -= entry.carbs;
-            dailyTotals.fat -= entry.fat;
+            const jsonData = JSON.stringify({
+                calories: lastEntry.calories,
+                protein: lastEntry.protein,
+                carbs: lastEntry.carbs,
+                fat: lastEntry.fat
+            });
 
-            // Remove from entries
-            todaysEntries.splice(index, 1);
-
-            // Update localStorage
-            localStorage.setItem('todaysEntries', JSON.stringify(todaysEntries));
-            localStorage.setItem('dailyTotals', JSON.stringify(dailyTotals));
-
-            // Try to delete from Google Sheets if it was synced
-            if (entry.sheetRow && isOnline && apiConnected) {
-                try {
-                    await deleteFromGoogleSheets(entry.sheetRow);
-                    showToast('success', 'Deleted', 'Entry removed from tracker and Google Sheets');
-                } catch (error) {
-                    showToast('warning', 'Partially Deleted', 'Removed locally but could not delete from Google Sheets');
-                }
-            } else {
-                showToast('info', 'Deleted Locally', 'Entry removed from tracker');
-            }
-
-            updateTotalsDisplay();
-            updateHistoryDisplay();
+            const url = `shortcuts://x-callback-url/run-shortcut?name=Log%20Nutrition&input=text&text=${encodeURIComponent(jsonData)}`;
+            window.location.href = url;
         }
 
-        async function deleteFromGoogleSheets(rowNumber) {
-            // This would require adding a delete endpoint to your Apps Script
-            // For now, just log it
-            console.log('Delete from sheets row:', rowNumber);
-            // Implementation would require Apps Script update
+        // Helper functions
+        function isIOS() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         }
 
         function formatTime(timestamp) {
             const date = new Date(timestamp);
-            return date.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
+            return date.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true 
             });
-        }
-
-        function clearForm() {
-            form.reset();
-            $('macroCalc').style.display = 'none';
-
-            // Clear favorite tracking when form is manually cleared
-            if (currentlyLoadedFavorite) {
-                hideFavoriteIndicator();
-            }
         }
 
         function updateDateDisplay() {
             const now = new Date();
-            const options = {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric'
-            };
-            dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            $('dateDisplay').textContent = now.toLocaleDateString('en-US', options);
         }
 
-        function setupPullToRefresh() {
-            let startY = 0;
-            let pullDistance = 0;
-            const container = document.querySelector('.container');
-            const pullIcon = $('pullToRefresh');
+        function showSuccessAnimation() {
+            const btn = $('submitBtn');
+            btn.classList.add('success');
+            btn.innerHTML = '<span class="success-checkmark">✓</span>';
             
-            if (!container || !pullIcon) return;
-
-            container.addEventListener('touchstart', (e) => {
-                startY = e.touches[0].clientY;
-            });
-
-            container.addEventListener('touchmove', (e) => {
-                if (window.scrollY === 0) {
-                    pullDistance = e.touches[0].clientY - startY;
-                    if (pullDistance > 0 && pullDistance < 80) {
-                        pullIcon.style.top = (pullDistance - 40) + 'px';
-                        pullIcon.style.opacity = pullDistance / 80;
-                    }
-                }
-            });
-
-            container.addEventListener('touchend', () => {
-                if (pullDistance > 50) {
-                    forceSync();
-                }
-                pullIcon.style.top = '-40px';
-                pullIcon.style.opacity = '0';
-                pullDistance = 0;
-            });
+            setTimeout(() => {
+                btn.innerHTML = 'Entry Logged!';
+            }, 500);
         }
 
-        // Test panel functions - Make them global so onclick works
+        function showPostSubmitButtons() {
+            if (isIOS()) {
+                $('appleHealthOptions').classList.add('show');
+                setTimeout(() => {
+                    $('appleHealthOptions').classList.remove('show');
+                }, 10000);
+            }
+
+            $('undoBtn').classList.add('show');
+            setTimeout(() => {
+                $('undoBtn').classList.remove('show');
+            }, 8000);
+        }
+
+        function updateConnectionStatus(status) {
+            const dot = $('statusDot');
+            const text = $('statusText');
+
+            switch(status) {
+                case 'connected':
+                    dot.className = 'status-dot connected';
+                    text.textContent = 'Connected';
+                    break;
+                case 'error':
+                    dot.className = 'status-dot error';
+                    text.textContent = 'Connection Error';
+                    break;
+                default:
+                    dot.className = 'status-dot';
+                    text.textContent = 'Connecting...';
+            }
+        }
+
+        function showToast(type, title, message) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✗',
+                info: 'ℹ',
+                warning: '⚠'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type]}</span>
+                <div>
+                    <div class="toast-title">${title}</div>
+                    <div style="font-size: 11px; color: #a0a0a0;">${message}</div>
+                </div>
+            `;
+
+            $('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 200);
+            }, 3000);
+        }
+
+        function stepValue(field, amount) {
+            const input = $(field);
+            const current = parseFloat(input.value) || 0;
+            input.value = Math.max(0, current + amount);
+            updateMacroCalculation();
+        }
+
+        // Test panel functions
         window.toggleTestPanel = function() {
-            if (testPanel) {
-                testPanel.classList.toggle('show');
+            $('testPanel').classList.toggle('show');
+        }
+
+        window.testConnection = async function() {
+            showToast('info', 'Testing...', 'Checking database connection');
+            await testSupabaseConnection();
+        }
+
+        window.exportData = async function() {
+            try {
+                const { data, error } = await supabase
+                    .from('food_log')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `nutrition-export-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+
+                showToast('success', 'Exported', `${data.length} entries exported`);
+            } catch (error) {
+                showToast('error', 'Export Failed', error.message);
             }
         }
 
-        window.testAPIConnection = async function() {
-            showToast('info', 'Testing...', 'Checking Google Sheets connection');
-            await checkAPIConnection();
-        }
+        window.clearAllData = async function() {
+            if (!confirm('Delete ALL data? This cannot be undone!')) return;
+            if (!confirm('Are you absolutely sure? All entries and favorites will be deleted!')) return;
 
-        window.forceSync = async function() {
-            showToast('info', 'Syncing...', 'Uploading unsynced entries');
-            await checkAPIConnection();
-            await processUnsyncedQueue();
-            updateSyncInfo();
-        }
-
-        window.clearAllData = function() {
-            if (confirm('Delete all data? This cannot be undone!')) {
-                localStorage.clear();
-                location.reload();
+            try {
+                await supabase.from('food_log').delete().neq('id', 0);
+                await supabase.from('favorites').delete().neq('id', 0);
+                
+                await loadTodaysTotals();
+                await loadTodaysEntries();
+                await loadFavorites();
+                
+                showToast('info', 'Cleared', 'All data deleted');
+            } catch (error) {
+                showToast('error', 'Clear Failed', error.message);
             }
         }
 
-        // Make these functions global for onclick handlers
+        window.migrateFromLocalStorage = async function() {
+            try {
+                // Get old data from localStorage
+                const oldEntries = JSON.parse(localStorage.getItem('todaysEntries') || '[]');
+                const oldFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                
+                let migrated = 0;
+
+                // Migrate entries
+                for (const entry of oldEntries) {
+                    const { error } = await supabase
+                        .from('food_log')
+                        .insert([{
+                            calories: entry.calories,
+                            protein: entry.protein,
+                            carbs: entry.carbs,
+                            fat: entry.fat,
+                            meal_type: entry.mealType,
+                            description: entry.description,
+                            source: entry.source || 'Manual',
+                            favorite_name: entry.favoriteName,
+                            client_id: entry.id
+                        }]);
+                    
+                    if (!error) migrated++;
+                }
+
+                // Migrate favorites
+                for (const fav of oldFavorites) {
+                    await supabase
+                        .from('favorites')
+                        .insert([{
+                            name: fav.name,
+                            calories: fav.calories,
+                            protein: fav.protein,
+                            carbs: fav.carbs,
+                            fat: fav.fat,
+                            meal_type: fav.mealType,
+                            description: fav.description,
+                            category: fav.category || fav.mealType
+                        }]);
+                }
+
+                await loadTodaysTotals();
+                await loadTodaysEntries();
+                await loadFavorites();
+
+                showToast('success', 'Migrated', `${migrated} entries imported from old system`);
+            } catch (error) {
+                showToast('error', 'Migration Failed', error.message);
+            }
+        }
+
+        // Make functions global for onclick handlers
         window.stepValue = stepValue;
-        window.quickAdd = quickAdd;
-        window.logToAppleHealthSimple = logToAppleHealthSimple;
-        window.copyForAppleHealth = copyForAppleHealth;
-        window.showAppleHealthDebug = showAppleHealthDebug;
-        window.undoLastEntry = undoLastEntry;
-        window.showAddFavorite = showAddFavorite;
+        window.logToAppleHealth = logToAppleHealth;
+        window.saveAsFavorite = saveAsFavorite;
+        window.loadFavorite = loadFavorite;
+        window.deleteFavorite = deleteFavorite;
         window.deleteEntry = deleteEntry;
         window.reloadEntry = reloadEntry;
-        window.deleteFavorite = deleteFavorite;
-        window.loadFavorite = loadFavorite;
-        window.filterFavorites = filterFavorites;
-        window.searchFavorites = searchFavorites;
-    </script>
-</body>
-</html>
+        window.undoLastEntry = undoLastEntry;
